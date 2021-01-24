@@ -1,0 +1,74 @@
+<html>
+	<head>
+		<script>
+			var req = new XMLHttpRequest();
+			req.onreadystatechange = function a() {
+				console.log(this.readyState, this.status);
+				if (this.readyState == 4) {
+						console.log(this.response);
+						var data = JSON.parse(this.response);
+						
+						for (var i in data) {
+							var t = document.getElementById("template").cloneNode(true);
+							t.removeAttribute("id");
+							t.children[0].innerText = data[i].id;
+							t.children[1].innerText = data[i].msg;
+							document.body.appendChild(t);
+						}
+				}
+			}
+			
+			req.open("GET", "json_data.txt");
+			req.send();
+		</script>
+	</head>
+	<body>
+		<!-- 데이터 파일 선택 -->
+		<div id="btn">
+			<form action="/" method="post">
+				<input name="file" type="submit" value="14-123-007_무부하_Seq Check">
+			</form>
+		</div>
+		<div>
+			<form action="/" method="post" >
+				<input name="file" type="submit" value="14-123-008_본시험_방압변 터짐">
+			</form>
+		</div>
+		<!-- 데이터 종류 선택 -->
+		<div id="btn">
+			<form action="/" method="post">
+				<input name="category" type="submit" value="Va">
+			</form>
+		<div>
+		<div id="btn">
+			<form action="/" method="post">
+				<input name="category" type="submit" value="Ia">
+			</form>
+		<div>
+		<div id="btn">
+			<form action="/" method="post">
+				<input name="category" type="submit" value="Vb">
+			</form>
+		<div>
+		<div id="btn">
+			<form action="/" method="post">
+				<input name="category" type="submit" value="Ib">
+			</form>
+		<div>
+		<div id="btn">
+			<form action="/" method="post">
+				<input name="category" type="submit" value="Vc">
+			</form>
+		<div>
+		<div id="btn">
+			<form action="/" method="post">
+				<input name="category" type="submit" value="Ic">
+			</form>
+		<div>
+		<div id="btn">
+			<form action="/" method="post">
+				<input name="category" type="submit" value="Stroke">
+			</form>
+		<div>
+	</body>
+</html>

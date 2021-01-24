@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script src="https://code.jquery.com/jquery-2.2.1.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/bower.json"></script>
+		<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/composer.json"></script>
+		<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/LICENSE.md"></script>
+		<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/package.json"></script>
+		<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/README.md"></script>
+		<link rel = "stylesheet" href = "{{ url_for('static', filename='css/div.css') }}">
+		
+		<meta charset="EUC-KR">
+	</head>
+		
+	<body>
+		<!-- 데이터 파일 선택 -->
+		<div id="btn">
+			<input name="file" type="submit" value="14-123-007_무부하_Seq Check" onclick=getFile(this.value)>
+		</div>
+		<div>
+			<input name="file" type="submit" value="14-123-008_본시험_방압변 터짐" onclick=getFile(this.value)>
+		</div>
+		<!-- 데이터 종류 선택 -->
+		<div id="btn">
+			<input name="category" type="submit" value="Va" onclick=getCategory(this.value)>
+		</div>
+		<div id="btn">
+			<input name="category" type="submit" value="Ia" onclick=getCategory(this.value)>
+		</div>
+		<div id="btn">
+			<input name="category" type="submit" value="Vb" onclick=getCategory(this.value)>
+		</div>
+		<div id="btn">
+			<input name="category" type="submit" value="Ib" onclick=getCategory(this.value)>
+		</div>
+		<div id="btn">
+			<input name="category" type="submit" value="Vc" onclick=getCategory(this.value)>
+		</div>
+		<div id="btn">
+			<input name="category" type="submit" value="Ic" onclick=getCategory(this.value)>
+		</div>
+		<div id="btn">
+			<input name="category" type="submit" value="Stroke" onclick=getCategory(this.value)>
+		</div>
+		<canvas id="myChart" width="400" height="100"></canvas>
+		<!-- 그래프 -->
+		<script>
+			
+			var file_data=''
+			var category_data=''
+			var value = {{data}};
+			function getFile(value) {
+				file_data = value
+				console.log(file_data)
+				$.ajax({
+					type:'POST',
+					url: "/getData",
+					data: {
+						file:value
+					}
+				});
+			}
+			
+			function getCategory(value) {
+				console.log(value)
+				$.ajax({
+					type:'POST',
+					url: "/getData",
+					data: {
+						category:value
+					},
+					success:function(result){
+						var value = result
+						var ctx = document.getElementById('myChart').getContext('2d');
+						var myChart = new Chart(ctx, {
+							type: 'line',
+							data: {
+								datasets: [{
+									data: [0, 0, 0, 0, 0],
+									borderColor: [
+										'rgba(255, 99, 132, 1)'
+									],
+									fill: false,
+									pointRadius: 0,
+									borderWidth: 1
+								}]
+							}
+						});
+					}
+				});
+			}
+			
+		</script>
+		
+		<div> 
+		</div>
+	</body>
+</html>

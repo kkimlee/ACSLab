@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script src="https://code.jquery.com/jquery-2.2.1.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/bower.json"></script>
+		<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/composer.json"></script>
+		<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/LICENSE.md"></script>
+		<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/package.json"></script>
+		<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/README.md"></script>
+		<link rel = "stylesheet" href = "{{ url_for('static', filename='css/div.css') }}">
+		
+		<meta charset="EUC-KR">
+	</head>
+		
+	<body>
+		<!-- 데이터 파일 선택 -->
+		<div id="btn">
+			<input name="file" type="submit" value="14-123-007_무부하_Seq Check" onclick=getFile(this.value) style="font-size:20px">
+		</div>
+		<div>
+			<input name="file" type="submit" value="14-123-008_본시험_방압변 터짐" onclick=getFile(this.value) style="font-size:20px">
+		</div>
+		<!-- 데이터 종류 선택 -->
+		<div id="btn">
+			<input name="category" type="submit" value="Va" onclick=getCategory(this.value) style="font-size:20px">
+		</div>
+		<div id="btn">
+			<input name="category" type="submit" value="Vb" onclick=getCategory(this.value) style="font-size:20px">
+		</div>
+		<div id="btn">
+			<input name="category" type="submit" value="Vc" onclick=getCategory(this.value) style="font-size:20px">
+		</div>
+		<div id="btn">
+			<input name="category" type="submit" value="Stroke" onclick=getCategory(this.value) style="font-size:20px">
+		</div>
+		<div>
+			<canvas id="myChart" width="400" height="100"></canvas>
+			<canvas id="myChart2" width="200" height="50"></canvas>
+		</div>
+		<!--
+		<div id="btn">
+			<input id="prev" type="submit" value="previous" onclick=movePage(this.value) style="font-size:20px">
+		</div>
+		<div>
+			<input id="next" type="submit" value="next" onclick=movePage(this.value) style="font-size:20px">
+		</div>
+		-->
+		<div>
+			<input id="classification" type="submit" value="classification" onclick=classification() style="font-size:20px">
+		</div>
+		<!-- 그래프 -->
+		<script>
+			var classification_btn = document.getElementById('classification');
+			//var next_btn = document.getElementById('next');
+			//var prev_btn = document.getElementById('prev');
+			var file_data='';
+			var category_data='';
+			
+			classification_btn.disabled = true;
+			//next_btn.disabled = true;
+			//prev_btn.disabled = true;
+			
+			var ctx = document.getElementById('myChart').getContext('2d');
+			var ctx2 = document.getElementById('myChart2').getContext('2d');
+			var myChart = new Chart(ctx, {});
+			var myChart2 = new Chart(ctx2, {});
+			
+			function getFile(value) {
+				myChart.destroy()
+				myChart2.destroy()
+				
+				file_data = value
+				console.log(file_data)
+				$.ajax({
+					type:'POST',
+					url: "/getData",
+					data: {
+						file:value
+					}
+				});
+			}
+			
+			function getCategory(value) {
+				myChart.destroy()
+				myChart2.destroy()
+				
+				category_data = value;
+				//next_btn.disabled = false;
+				//prev_btn.disabled = false;
+				
+				if(value == 'Va' || value == 'Vb' || value == 'Vc')
+				{
+					classification_btn.disabled = false;
+				}
+				else
+				{
+					classification_btn.disabled = true;
+				}
+			
+				$.ajax({
+					type:'POST',
+					url: "/getData",
+					data: {
+						category:value
+					},
+					success:function(result){
+						var category = result.category;
+						var value = result.value;
+						var index = result.index;
+						
+						myChart = new Chart(ctx, {
+							type: 'line',
+							data: {
+								labels: index,
+								datasets: [{
+									label: category,
+									data: value,
+									borderColor: [
+										'rgba(255, 99, 132, 1)'
+									],
+									fill: false,
+									pointRadius: 0,
+									borderWidth: 1
+								}]
+							}
+						});
+					}
+				});
+			}
+			
+			function movePage(value) {
+				myChart.destroy()
+				myChart2.destroy()
+				
+				$.ajax({
+					type:'POST',
+					url: "/movePage",
+					data: {
+						act:value
+					},
+					success:function(result){
+						var category = result.category;
+						var value = result.value;
+						var index = result.index;
+						
+						myChart = new Chart(ctx, {
+							type: 'line',
+							data: {
+								labels: index,
+								datasets: [{
+									label: category,
+									data: value,
+									borderColor: [
+										'rgba(255, 99, 132, 1)'
+									],
+									fill: false,
+									pointRadius: 0,
+									borderWidth: 1
+								}]
+							}
+						});
+					}
+				});
+			}
+				
+			
+			function classification() {
+				myChart.destroy()
+				myChart2.destroy()
+				
+				$.ajax({
+					type:'POST',
+					url: "/classification",
+					success:function(result){
+						var category = result.category;
+						var value = result.value;
+						var index = result.index;
+						var classes = result.result;
+						
+						myChart = new Chart(ctx, {
+							type: 'line',
+							data: {
+								labels: index,
+								datasets: [{
+									label: category,
+									data: value,
+									backgroundColor: function(){
+										var color = [];
+										
+										for (var i = 0; i < classes.length; i++) {
+											if (classes[i] == 2) {
+												for (var j = i*10000; j < (i+1)*10000; j++) {
+													color.push('rgba(255, 0, 0, 1)');
+												}
+											}
+											else if (classes[i] == 1){
+												for (var j = i*10000; j < (i+1)*10000; j++) {
+													color.push('rgba(0, 0, 255, 1)');
+												}
+											}
+											else {
+												for (var j = i*10000; j < (i+1)*10000; j++) {
+													color.push('rgba(0, 255, 0, 1)');
+												}
+											}
+										}
+										
+										return color
+									},
+									fill: false,
+									pointRadius: 1,
+									borderWidth: 1
+								}]
+							}
+						});
+						
+						var index2 = []
+						var value2 = []
+						
+						for (var i = 0; i < classes.length; i++) {
+							if(classes[i] == 2) {
+								for (var j = i*10000; j < (i+1)*10000; j++) {
+									index2.push(index[j])
+									value2.push(value[j])
+								}
+							}
+						}
+						
+						myChart2 = new Chart(ctx2, {
+							type: 'line',
+							data: {
+								labels: index2,
+								datasets: [{
+									label: "아크전압",
+									data: value2,
+									borderColor: [
+										'rgba(255, 99, 132, 1)'
+									],
+									fill: false,
+									pointRadius: 0,
+									borderWidth: 1
+								}]
+							}
+						});
+					}
+				});
+			}
+		</script>
+	</body>
+</html>
