@@ -1,0 +1,4 @@
+classes= 1
+train  = barcode/barcode.txt
+names = barcode/barcode.names
+backup = barcode/backup/
