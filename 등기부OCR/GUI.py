@@ -17,13 +17,16 @@ class MyApp(QWidget):
         # 위젯의 위치 지정
         self.center()
         
+        # 파일 탐색 버튼
         self.file_button = QPushButton('파일 탐색')
         self.file_button.clicked.connect(self.pushButtonClicked)
         self.label = QLabel()
         
+        # 엑셀 변환 버튼
         self.excel_button = QPushButton('엑셀 변환')
         self.excel_button.clicked.connect(self.convert_to_excel)
         
+        # 레이아웃
         layout = QVBoxLayout()
         layout.addWidget(self.file_button)
         layout.addWidget(self.excel_button)
@@ -40,10 +43,12 @@ class MyApp(QWidget):
         self.frameGeometry().moveCenter(cen)
 
 
+    # 파일 탐색 버튼 클릭시
     def pushButtonClicked(self):
         self.fname = QFileDialog.getOpenFileName(self)
         self.label.setText(self.fname[0])
     
+    # 특수 문자 제거 
     def cleanText(self, readData):
  
         #텍스트에 포함되어 있는 특수 문자 제거
@@ -65,6 +70,7 @@ class MyApp(QWidget):
                     print(hosu)
         return dong, hosu
     
+    # 소유자 찾기 
     def findhost(self, line):
         line = line.split()
         for text_ind in range(len(line)) :
@@ -158,10 +164,12 @@ class MyApp(QWidget):
         
         return data_list
     
+    # 데이터 프레임형태로 변
     def makeframe(self, result):
         df = DataFrame(result, columns=['동','호수','소유자', '주소', '건물내역', '대지권비율'])
         return df
     
+    # 엑셀 파일 생성
     def makeexcel(self, df):
         df.to_excel('등기부등본.xlsx', # directory and file name to write
 
@@ -185,6 +193,7 @@ class MyApp(QWidget):
 
             )
     
+    # 데이터 추출 
     def showFile_1(self, filename):
         f = open(filename, 'r')
         lines = f.readlines()
@@ -194,6 +203,7 @@ class MyApp(QWidget):
     
         result = []
         
+        # 동, 호수, 소유자 추출
         for line in lines :
             #특문제거
             line = self.cleanText(line)
@@ -232,6 +242,7 @@ class MyApp(QWidget):
         # 데이터 프레임을 엑셀로 저장
         self.makeexcel(deungi)
     
+    # 엑셀로 변환 버튼 클릭
     def convert_to_excel(self):
         print(self.fname[0])
         #file_name = self.fname[0].split('/')[-1]
