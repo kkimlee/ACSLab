@@ -33,15 +33,18 @@ from pynput.keyboard import Listener, Key, KeyCode
 }
 """
 
+cameraTypeMap = { 
+ "depth": airsim.ImageType.DepthVis,
+ "segmentation": airsim.ImageType.Segmentation,
+ "seg": airsim.ImageType.Segmentation,
+ "scene": airsim.ImageType.Scene,
+ "disparity": airsim.ImageType.DisparityNormalized,
+ "normals": airsim.ImageType.SurfaceNormals
+}
+
 def handlePress(key):
 	global drone, x, y, z
-	
-	state = client.getMultirotorState(vehicle_name=drone)
-	yaw = state.rc_data.yaw
-	print(yaw)
-	
-	print(state1.rc_data)
-	
+		
 	if key == KeyCode(char='a'):
 		client.moveByVelocityAsync(0, -1, 0, 0.5, vehicle_name=drone)
 
@@ -87,8 +90,7 @@ def handlePress(key):
 		client.enableApiControl(False, "Drone3")
 
 		return False
-
-		
+	
 def handleRelease(key):
 	print('Released: {}'.format(key))
 	
@@ -129,7 +131,19 @@ print("state: %s" % s)
 
 
 drone = 'Drone1'
-with Listener(on_press=handlePress, on_release=handleRelease) as listener:
-    listener.join()
 
+# with Listener(on_press=handlePress, on_release=handleRelease) as listener:
+#     listener.join()
 
+while(True):
+	with Listener(on_press=handlePress, on_release=handleRelease) as listener:
+    		listener.join()
+    
+	rawImage = client.simGetImage("0", cameraTypeMap["scene"], vehicle_name=drone)
+	if (rawImage == None):
+		print("Camera is not returning image, please check airsim for error messages")
+	else:
+		png = cv2.imdecode(airsim.string_to_uint8_array(rawImage), cv2.IMREAD_UNCHANGED)
+		cv2.imshow("img", png)
+	
+		cv2.waitKey(1)
