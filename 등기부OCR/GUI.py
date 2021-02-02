@@ -2,6 +2,7 @@ import re
 import sys
 from PyQt5.QtWidgets import *
 from pandas import Series, DataFrame
+import openpyxl
 
 class MyApp(QWidget):
     def __init__(self):
@@ -153,7 +154,7 @@ class MyApp(QWidget):
                     owned_land = temp_str.split(' ')[1:3]
                     data.append(owned_land[0] + owned_land[1])
                 
-                data_list.append(data)
+            data_list.append(data)
         
         return data_list
     
@@ -233,7 +234,8 @@ class MyApp(QWidget):
     
     def convert_to_excel(self):
         print(self.fname[0])
-        file_name = self.fname[0].split('/')[-1]
+        #file_name = self.fname[0].split('/')[-1]
+        file_name = self.fname[0]
         print(file_name)
         self.showFile_1(self.fname[0])
         
