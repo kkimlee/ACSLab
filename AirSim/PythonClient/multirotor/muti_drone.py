@@ -6,6 +6,7 @@ import pprint
 import setup_path 
 import tempfile
 from pynput.keyboard import Listener, Key, KeyCode
+from threading import Thread
 
 # Use below in settings.json with Blocks environment
 """
@@ -97,6 +98,45 @@ def handleRelease(key):
 	if key == Key.esc:
 		return False
 
+
+def key_event():
+	with Listener(on_press=handlePress, on_release=handleRelease) as listener:
+    		listener.join()
+
+def show_img():
+	fourcc = cv2.VideoWriter_fourcc(*'DIVX')
+	w = 256
+	h = 144
+	out = cv2.VideoWriter('ouput.avi', fourcc, 30.0, (w, h))
+	
+	idx = 0
+	while True:
+		rawImage = client.simGetImage("0", cameraTypeMap["scene"], vehicle_name=drone)
+		if (rawImage == None):
+			print("Camera is not returning image, please check airsim for error messages")
+		else:
+			png = cv2.imdecode(airsim.string_to_uint8_array(rawImage), cv2.IMREAD_UNCHANGED)
+			png = png[:, :, :3]
+			print(png.shape)
+			cv2.imshow("img", png)
+			
+			if idx < 10:
+				strIdx = "00"+str(idx)
+			elif idx < 100:
+				strIdx = "0"+str(idx)
+			else:
+				strIdx = str(idx)
+			
+			cv2.imwrite('frame/frame' + strIdx + '.jpg', png)
+			out.write(png)
+			
+		idx += 1
+		if cv2.waitKey(1) == ord('p'):
+			break
+	
+	cv2.destroyAllWindows()
+	out.release()
+	
 # connect to the AirSim simulator
 client = airsim.MultirotorClient()
 client.confirmConnection()
@@ -133,17 +173,7 @@ print("state: %s" % s)
 drone = 'Drone1'
 
 # with Listener(on_press=handlePress, on_release=handleRelease) as listener:
-#     listener.join()
+#   listener.join()
 
-while(True):
-	with Listener(on_press=handlePress, on_release=handleRelease) as listener:
-    		listener.join()
-    
-	rawImage = client.simGetImage("0", cameraTypeMap["scene"], vehicle_name=drone)
-	if (rawImage == None):
-		print("Camera is not returning image, please check airsim for error messages")
-	else:
-		png = cv2.imdecode(airsim.string_to_uint8_array(rawImage), cv2.IMREAD_UNCHANGED)
-		cv2.imshow("img", png)
-	
-		cv2.waitKey(1)
+Listener(on_press=handlePress, on_release=handleRelease).start()
+Thread(target=show_img).start()

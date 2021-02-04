@@ -1,0 +1,4 @@
+classes= 1
+train  = drone/drone.txt
+names = drone/drone.names
+backup = drone/backup/
