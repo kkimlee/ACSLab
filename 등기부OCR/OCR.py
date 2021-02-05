@@ -108,7 +108,7 @@ def extract_data(lines):
         
         data.append(address)
             
-        for line in ho[i][headline_idx:]:
+        for line in ho[i][headline_idx:address_start_idx]:
             # 면적 추출
             if line.find('㎡') >= 0:
                 data.append(line[line.find(')')+2:-1])
@@ -120,7 +120,7 @@ def extract_data(lines):
                 data.append(owned_land[0] + owned_land[1])
                 
         data_list.append(data)
-        
+
     return data_list
 
 def makeframe(result):
@@ -185,7 +185,12 @@ def showFile_1(filename):
     concat_result = list()
     for concat1, concat2 in zip(result, result2):
         concat_result.append(concat1+concat2)
-    print(concat_result)
+    
+    print(concat_result[0])
+    for test in concat_result:
+        if len(test) > 6:
+            print(test)
+        
     
     f.close()
     
@@ -197,4 +202,4 @@ def showFile_1(filename):
     makeexcel(deungi)
     
     
-showFile_1('1동101_110호.txt')
+showFile_1('2동.txt')
