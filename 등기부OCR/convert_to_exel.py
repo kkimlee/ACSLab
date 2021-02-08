@@ -1,12 +1,39 @@
-file = open('1동101_110호.txt', 'r')
-lines = file.readlines()
+import re
 
+def cleanText(readData):
+ 
+    #텍스트에 포함되어 있는 특수 문자 제거
+ 
+    text = re.sub('[-=+,#/\?:^$.@*\"※~&%ㆍ!』\\‘|\(\)\[\]\<\>`\'…》]', '', readData)
+ 
+    return text
+
+file = open('2동.txt', 'r')
+lines = file.readlines()
+lines2 = file.readlines()
+
+remove = list()
+idx = 0
+for line in lines:
+    if line.find('발행번호') >= 0 or line.find('집합건물') >= 0 or line.find('/') >= 0 or line.find('순위번호') >= 0 or len(line)==2:
+        remove.append(idx)
+    idx += 1
+    
+for i in range(len(remove)):
+    del lines[remove[i]-i]
+    
 # 전체 데이터에서 호수 분류를 위한 줄 번호 탐색
 ho_idx = list()
 idx = 0
 for line in lines:
+    line = cleanText(line)
     if line.find('등기사항전부증명서') >= 0:
         ho_idx.append(idx)
+    '''
+    if line.find('집합건물') >= 0:
+        del lines[idx]
+        idx -= 1
+    '''
     idx += 1
 
 # 호수별 데이터 분류

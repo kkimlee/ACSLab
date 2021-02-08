@@ -41,16 +41,24 @@ def findhost(line):
 
 # 주소, 건물내역, 대지권 비율 추출
 def extract_data(lines):
+    remove = list()
+    idx = 0
+    for line in lines:
+        if line.find('발행번호') >= 0 or line.find('집합건물') >= 0 or line.find('/') >= 0 or line.find('순위번호') >= 0 or len(line)==2
+:
+
+            remove.append(idx)
+        idx += 1
+    
+    for i in range(len(remove)):
+        del lines[remove[i]-i]
+    
     # 전체 데이터에서 호수 분류를 위한 줄 번호 탐색
     ho_idx = list()
     idx = 0
     for line in lines:
         if line.find('등기사항전부증명서') >= 0:
-            ho_idx.append(idx)
-        if line.find('발행번호') >= 0 or line.find('집합건물') >= 0 or line.find('/') >= 0 or line.find('순위번호') >= 0 or line.find('') >= 0 :
-            del lines[idx]
-            idx -= 1
-            
+            ho_idx.append(idx)       
         idx += 1
 
     # 호수별 데이터 분류
@@ -91,8 +99,7 @@ def extract_data(lines):
             if line.find('전거') >= 0 or line.find('매매') >= 0:
                 address_idx = idx
             idx += 1
-        
-    
+
         address = ''
         # 가장 마지막 기록이 '전거'일 경우
         if ho[i][address_idx].find('전거') >= 0:
