@@ -47,6 +47,10 @@ def extract_data(lines):
     for line in lines:
         if line.find('등기사항전부증명서') >= 0:
             ho_idx.append(idx)
+        if line.find('발행번호') >= 0 or line.find('집합건물') >= 0 or line.find('/') >= 0 or line.find('순위번호') >= 0 or line.find('') >= 0 :
+            del lines[idx]
+            idx -= 1
+            
         idx += 1
 
     # 호수별 데이터 분류
@@ -100,11 +104,18 @@ def extract_data(lines):
     
         # 가장 마지막 기록이 '매매'일 경우
         if ho[i][address_idx].find('매매') >= 0:
-            temp_idx = ho[i][address_idx].find('매매')
-            address = ho[i][address_idx][temp_idx+3:-1]
+            idx = 0
+            if ho[i][address_idx-1].find('공유자') >= 0:
+                address = ho[i][address_idx+2]
+                
+                if ho[i][address_idx+3].find('호') >= 0:
+                    address +=ho[i][address_idx+3][:-1]
+            if ho[i][address_idx-1].find('소유자') >= 0:
+                temp_idx = ho[i][address_idx].find('매매')
+                address = ho[i][address_idx][temp_idx+3:-1]
         
-            if ho[i][address_idx+1].find('호') >= 0:
-                address += ho[i][address_idx+1][:-1]
+                if ho[i][address_idx+1].find('호') >= 0:
+                    address += ho[i][address_idx+1][:-1]
         
         data.append(address)
             
