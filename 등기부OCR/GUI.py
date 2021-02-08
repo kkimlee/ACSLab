@@ -300,6 +300,8 @@ class MyApp(QWidget):
                 if str(type(host)) == "<class 'list'>":
                     host = ' '.join(host)
                     print('리스트 형태 호스트 결과 출력 :',host)
+                else:
+                    host = ' '.join(host)
                 
                 # 최종 결과 데이터 생성
                 data = [d, h, host]
