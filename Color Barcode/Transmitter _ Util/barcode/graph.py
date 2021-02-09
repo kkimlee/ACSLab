@@ -1,11 +1,23 @@
 import os
 import cv2
 import numpy as np
+from enum import Enum
 from scipy import signal
 import matplotlib as mpl
 mpl.use('TkAgg')
 import matplotlib.pyplot as plt
+import colorsys # rgb to hsl
 
+# 3bit
+class ColorSet(Enum):
+    C000 = [255,0,0]
+    C001 = [255,191.5,0]
+    C011 = [127.5,255,0]
+    C010 = [0,255,63.5]
+    C110 = [0,255,255]
+    C111 = [0,63.5,255]
+    C101 = [127.5,0,255]
+    C100 = [255,0,191.5]
 
 def search(path, extension):
     files = os.listdir(path)
@@ -53,19 +65,15 @@ def GetGraph(img, x_start, x_end, pos):
     b_mean = np.array(b_list)
 
     # B, G, R 성분 분화
-    print('B, G, R 성분 분화')
     rotated_b, rotated_g, rotated_r = cv2.split(img)
 
     # 90도 회전
-    print('90도 회전')
     rotated_plt = cv2.merge([rotated_r.T, rotated_g.T, rotated_b.T])
 
     # 상하반전
-    print('상하반전')
     rotated_plt = cv2.flip(rotated_plt, 0)
 
     # 최대 최소 고려
-    print('최대 최소 고려')
     r_max = np.argmax(r_mean)
     r_min = np.argmin(r_mean)
     g_max = np.argmax(g_mean)
@@ -181,9 +189,6 @@ def GetPixelGraph(img, x_start, x_end, frame_type):
     b_first = compare(b_max, b_min, 0)
     b_second = compare(b_max, b_min, 1)
     
-    print(r_first, r_second)
-    print(g_first, g_second)
-    print(b_first, b_second)
     # 중간값 
     r_median = np.argsort(r_mean_filtered)[len(r_mean_filtered)//2]
     g_median = np.argsort(g_mean_filtered)[len(g_mean_filtered)//2]
@@ -279,8 +284,8 @@ def GetPixelGraph(img, x_start, x_end, frame_type):
     rgb_min = [r_min, g_min, b_min]
     rgb_pilot = [R, R_prime, G, G_prime, B, B_prime]
 
-    print(rgb_emax)
-    print(type(rgb_emax[0]))
+    # print(rgb_emax)
+    # print(type(rgb_emax[0]))
 
     return rgb_emax, rgb_emin, rgb_max, rgb_min, rgb_pilot
 
@@ -308,9 +313,6 @@ def GetColor(img, x_start, x_end):
 def estimating(r, g, b, channel_matrix, pseudo=False):
     color = np.array([[r], [g], [b]])
 
-    print("Rx")
-    print(color)
-
     # dot H
     # print(channel_matrix)
     if pseudo == False:
@@ -320,24 +322,78 @@ def estimating(r, g, b, channel_matrix, pseudo=False):
         color = np.dot(np.linalg.pinv(channel_matrix), color)
     # color = np.clip(color, 0 , 255)
 
-    print("Est")
-    print(color)
-
     return color
+
+def decoding(color):
+    est_h, est_l, est_s = colorsys.rgb_to_hls(color[0],color[1],color[2])  
+    print(est_h)
+  
+    code_hls_list = []
+    for item in ColorSet:
+        h, l, s = colorsys.rgb_to_hls(item.value[0], item.value[1], item.value[2])
+        code_hls_list.append(h)
+
+    code_hls_list = np.array(code_hls_list)
+    print(code_hls_list)
+
+    # decoding, maximum likelihood
+    min = 1.0
+    minIdx = -1
+    idx = 0
+    for item in code_hls_list:
+        diff1 = abs(item - est_h)
+        diff2 = abs(1-diff1)
+        diff = np.where(diff1<diff2, diff1, diff2)
+        if diff < min:
+            min = diff
+            minIdx = idx
+        idx += 1
+
+    print("Est:{0}, Candidate:{1}".format(est_h, code_hls_list[minIdx]))
+    return minIdx
 
 
 frames = search('./', '.jpg')
 frames.sort()
 
 channel_matrix = [[0,0,0], [0,0,0], [0,0,0]]
+
+rx_data_list = list()
+
+sync = 0
 for frame in frames:
     print(frame)
     img = cv2.imread(frame)
     cv2.imshow('barcode', img)
     cv2.waitKey(0)
     GetGraph(img, 0, 339, 0)
-    GetPixelGraph(img, 0, 339, 0)
-    r, g, b = GetColor(img, 0, 339)
-    print(r, g, b)
-    # rx_color = estimating(r, g, b, channel_matrix)
-
+    rgb_emax, rgb_emin, rgb_max, rgb_min, rgb_pilot = GetPixelGraph(img, 0, 339, 0)
+    if sync == 0:
+        if rgb_pilot == [1, 1, 0, 0, 0, 0]:
+            sync += 1
+            r, g, b = GetColor(img, 0, 339)
+            channel_matrix[0] = [r, g, b]
+    elif sync == 1:
+        if rgb_pilot == [0, 0, 1, 1, 0, 0]:
+            sync += 1
+            r, g, b = GetColor(img, 0, 339)
+            channel_matrix[1] = [r, g, b]
+        else:
+            sync = 0
+            channel_matrix = [[0,0,0], [0,0,0], [0,0,0]]
+    elif sync == 2:
+        if rgb_pilot == [0, 0, 0, 0, 1, 1]:
+            sync += 1
+            r, g, b = GetColor(img, 0, 339)
+            channel_matrix[2] = [r, g, b]
+            print("sync")
+        else:
+            sync = 0
+            channel_matrix = [[0,0,0], [0,0,0], [0,0,0]]
+    elif sync == 3:
+        r, g, b = GetColor(img, 0, 339)
+        rx_color = estimating(r, g, b, channel_matrix)
+        rx_data = decoding(rx_color)
+        rx_data_list.append(rx_data)
+        print(rx_data_list)
+    print(channel_matrix)
