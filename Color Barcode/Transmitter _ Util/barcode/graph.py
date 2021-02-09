@@ -19,6 +19,20 @@ def search(path, extension):
     
     return file_list
 
+def compare(argmax, argmin, sort):
+    # sort 이면 큰 수 출력
+    if sort:
+        if argmax > argmin:
+            return argmax
+        else:
+            return argmin
+    # sort 아니면 작은 수 출력
+    else:
+        if argmax < argmin:
+            return argmax
+        else:
+            return argmin
+
 def GetGraph(img, x_start, x_end, pos):
     img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
     red, green, blue = cv2.split(img)
@@ -159,12 +173,73 @@ def GetPixelGraph(img, x_start, x_end, frame_type):
     b_min = np.argmin(b_mean_filtered)
 
     
+    # 최대 최소 위치 비교
+    r_first = compare(r_max, r_min, 0)
+    r_second = compare(r_max, r_min, 1)
+    g_first = compare(g_max, g_min, 0)
+    g_second = compare(g_max, g_min, 1)
+    b_first = compare(b_max, b_min, 0)
+    b_second = compare(b_max, b_min, 1)
+    
+    print(r_first, r_second)
+    print(g_first, g_second)
+    print(b_first, b_second)
+    # 중간값 
+    r_median = np.argsort(r_mean_filtered)[len(r_mean_filtered)//2]
+    g_median = np.argsort(g_mean_filtered)[len(g_mean_filtered)//2]
+    b_median = np.argsort(b_mean_filtered)[len(b_mean_filtered)//2]
+    
+    R = 0
+    R_prime = 0
+    # R 찾기
+    if r_mean_filtered[r_first] > r_mean_filtered[r_median] and \
+       g_mean_filtered[g_first] < g_mean_filtered[g_median] and \
+       b_mean_filtered[b_first] < b_mean_filtered[b_median]:
+        R = 1
+    if r_mean_filtered[r_second] < r_mean_filtered[r_median] and \
+       g_mean_filtered[g_second] > g_mean_filtered[g_median] and \
+       b_mean_filtered[b_second] > b_mean_filtered[b_median]:
+        R_prime = 1
+    if R and R_prime:
+        print("RR`")
+    
+    G = 0
+    G_prime = 0
+    # G 찾기
+    if r_mean_filtered[r_first] < r_mean_filtered[r_median] and \
+       g_mean_filtered[g_first] > g_mean_filtered[g_median] and \
+       b_mean_filtered[b_first] < b_mean_filtered[b_median]:
+        G = 1
+    if r_mean_filtered[r_second] > r_mean_filtered[r_median] and \
+       g_mean_filtered[g_second] < g_mean_filtered[g_median] and \
+       b_mean_filtered[b_second] > b_mean_filtered[b_median]:
+        G_prime = 1
+    if G and G_prime:
+        print("GG`")
+        
+    B = 0
+    B_prime = 0
+    # B 찾기
+    if r_mean_filtered[r_first] < r_mean_filtered[r_median] and \
+       g_mean_filtered[g_first] < g_mean_filtered[g_median] and \
+       b_mean_filtered[b_first] > b_mean_filtered[b_median]:
+        B = 1
+    if r_mean_filtered[r_second] > r_mean_filtered[r_median] and \
+       g_mean_filtered[g_second] > g_mean_filtered[g_median] and \
+       b_mean_filtered[b_second] < b_mean_filtered[b_median]:
+        B_prime = 1
+    if B and B_prime:
+        print("BB`")
+           
+    print(R, R_prime, G, G_prime, B, B_prime)
+    
     # R, G, B graph
     plt.subplot(411), plt.imshow(img)
     plt.subplot(412), plt.plot(r_mean, color='r'), plt.title(
         str(r_mean[r_max]) + ' ' + str(r_max) + ' ' + str(r_mean[r_min]) + ' ' + str(r_min))
     plt.axvline(x=r_max, color='r', linestyle='--')
     plt.axvline(x=r_min, color='b', linestyle='--')
+    plt.axvline(x=r_median, color='g', linestyle='--')
     for x_ in r_emax:
         plt.axvline(x=x_, color='g', linewidth=1)
     for x_ in r_emin:
@@ -174,6 +249,7 @@ def GetPixelGraph(img, x_start, x_end, frame_type):
         str(g_mean[g_max]) + ' ' + str(g_max) + ' ' + str(g_mean[g_min]) + ' ' + str(g_min))
     plt.axvline(x=g_max, color='r', linestyle='--')
     plt.axvline(x=g_min, color='b', linestyle='--')
+    plt.axvline(x=g_median, color='g', linestyle='--')
     for x_ in g_emax:
         plt.axvline(x=x_, color='g', linewidth=1)
     for x_ in g_emin:
@@ -183,6 +259,7 @@ def GetPixelGraph(img, x_start, x_end, frame_type):
         str(b_mean[b_max]) + ' ' + str(b_max) + ' ' + str(b_mean[b_min]) + ' ' + str(b_min))
     plt.axvline(x=b_max, color='r', linestyle='--')
     plt.axvline(x=b_min, color='b', linestyle='--')
+    plt.axvline(x=b_median, color='g', linestyle='--')
     for x_ in b_emax:
         plt.axvline(x=x_, color='g', linewidth=1)
     for x_ in b_emin:
@@ -200,11 +277,12 @@ def GetPixelGraph(img, x_start, x_end, frame_type):
     rgb_emin = [r_emin, g_emin, b_emin]
     rgb_max = [r_max, g_max, b_max]
     rgb_min = [r_min, g_min, b_min]
+    rgb_pilot = [R, R_prime, G, G_prime, B, B_prime]
 
     print(rgb_emax)
     print(type(rgb_emax[0]))
 
-    return rgb_emax, rgb_emin, rgb_max, rgb_min
+    return rgb_emax, rgb_emin, rgb_max, rgb_min, rgb_pilot
 
 def GetColor(img, x_start, x_end):
     img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
