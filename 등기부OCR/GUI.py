@@ -113,9 +113,6 @@ class MyApp(QWidget):
         for line in lines:
             if line.find('등기사항전부증명서') >= 0:
                 ho_idx.append(idx)
-            if line.find('발행번호') >= 0 or line.find('집합건물') >= 0 or line.find('/') >= 0 or line.find('순위번호') >= 0:
-                del lines[idx]
-                idx -= 1
             idx += 1
 
         # 호수별 데이터 분류
