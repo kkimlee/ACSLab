@@ -244,8 +244,9 @@ def GetPixelGraph(img, x_start, x_end, frame_type):
     #     print("BB`")
            
     # print(R, R_prime, G, G_prime, B, B_prime)
-    '''
+    
     # R, G, B graph
+    
     plt.subplot(411), plt.imshow(img)
     plt.subplot(412), plt.plot(r_mean, color='r'), plt.title(
         str(r_mean[r_max]) + ' ' + str(r_max) + ' ' + str(r_mean[r_min]) + ' ' + str(r_min))
@@ -279,7 +280,7 @@ def GetPixelGraph(img, x_start, x_end, frame_type):
     plt.plot(b_mean_filtered)
     plt.tight_layout()
     plt.show()
-    '''
+    
 
     pilot_red = []
     pilot_green = []
@@ -365,6 +366,36 @@ def decoding(color):
         code_hls_list.append(h)
 
     code_hls_list = np.array(code_hls_list)
+    print(code_hls_list)
+
+    # decoding, maximum likelihood
+    min = 1.0
+    minIdx = -1
+    idx = 0
+    for item in code_hls_list:
+        diff1 = abs(item - est_h)
+        diff2 = abs(1-diff1)
+        diff = np.where(diff1<diff2, diff1, diff2)
+        if diff < min:
+            min = diff
+            minIdx = idx
+        idx += 1
+
+    print("Est:{0}, Candidate:{1}".format(est_h, code_hls_list[minIdx]))
+    return minIdx
+
+def decoding2(rgb_color, cmy_color):
+    est_h1, est_l1, est_s1 = colorsys.rgb_to_hls(rgb_color[0],rgb_color[1],rgb_color[2])  
+    est_h2, est_l2, est_s2 = colorsys.rgb_to_hls(cmy_color[0],cmy_color[1],cmy_color[2])  
+    # print('color :', est_h)
+  
+    est_h = (est_h1 + est_h2)/2
+    code_hls_list = []
+    for item in ColorSet:
+        h, l, s = colorsys.rgb_to_hls(item.value[0], item.value[1], item.value[2])
+        code_hls_list.append(h)
+
+    code_hls_list = np.array(code_hls_list)
     # print(code_hls_list)
 
     # decoding, maximum likelihood
@@ -372,16 +403,15 @@ def decoding(color):
     minIdx = -1
     idx = 0
     for item in code_hls_list:
-        # diff1 = abs(item - est_h)
-        # diff2 = abs(1-diff1)
-        # diff = np.where(diff1<diff2, diff1, diff2)
-        diff = abs(item - est_h)
+        diff1 = abs(item - est_h)
+        diff2 = abs(1-diff1)
+        diff = np.where(diff1<diff2, diff1, diff2)
         if diff < min:
             min = diff
             minIdx = idx
         idx += 1
 
-    # print("Est:{0}, Candidate:{1}".format(est_h, code_hls_list[minIdx]))
+    print("Est:{0}, Candidate:{1}".format(est_h, code_hls_list[minIdx]))
     return minIdx
 
 def calculateBER(origin_data_list, rx_data_list):
@@ -431,6 +461,7 @@ cmy_channel_matrix = [[0,0,0], [0,0,0], [0,0,0]]
 rx_data_list = list()
 rx_data_list2 = list()
 rx_data_list3 = list()
+rx_data_list4 = list()
 
 num_frame = 0
 sync = 0
@@ -438,8 +469,9 @@ sync = 0
 ber = list()
 ber2 = list()
 ber3 = list()
+ber4 = list()
 for frame in frames:
-    # print(frame)
+    print(frame)
     img = cv2.imread(frame)
     rgb_emax, rgb_emin, rgb_max, rgb_min, rgb_pilot, pos = GetPixelGraph(img, 0, 339, 0)  
     if sync == 0:
@@ -484,6 +516,8 @@ for frame in frames:
         rx_data3 = decoding(rx_color3)
         rx_data_list3.append(rx_data3)
         
+        rx_data4 = decoding2(rx_color, rx_color2)
+        rx_data_list4.append(rx_data4)
         # print('rx_data_list : ', rx_data_list)
         num_frame += 1
 
@@ -493,13 +527,16 @@ for frame in frames:
         ber.append(calculateBER(origin_data_list, rx_data_list))
         ber2.append(calculateBER(origin_data_list, rx_data_list2))
         ber3.append(calculateBER(origin_data_list, rx_data_list3))
+        ber4.append(calculateBER(origin_data_list, rx_data_list4))
         rx_data_list = list()
         rx_data_list2 = list()
         rx_data_list3 = list()
+        rx_data_list4 = list()
         print('sync out', frame)
-    # GetPixelGraph(img, 0, 339, 0)    
+    GetPixelGraph(img, 0, 339, 0)    
     # cv2.imshow('barcode', img)
     # cv2.waitKey(0)
 print(ber)
 print(ber2)
 print(ber3)
+print(ber4)
