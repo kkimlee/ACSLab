@@ -46,7 +46,7 @@ def compare(argmax, argmin, sort):
             return argmin
 
 def GetGraph(img, x_start, x_end, pos):
-    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     red, green, blue = cv2.split(img)
     b_list = []
     g_list = []
@@ -158,19 +158,6 @@ def GetPixelGraph(img, x_start, x_end, frame_type):
     # plt.axvline(100, color='green') # cutoff frequency
     # plt.show()
 
-    # Finding Extrema
-    # r_emax = argrelextrema(r_mean_filtered, np.greater_equal)[0]
-    # r_emin = argrelextrema(r_mean_filtered, np.less_equal)[0]
-    # g_emax = argrelextrema(g_mean_filtered, np.greater_equal)[0]
-    # g_emin = argrelextrema(g_mean_filtered, np.less_equal)[0]
-    # b_emax = argrelextrema(b_mean_filtered, np.greater_equal)[0]
-    # b_emin = argrelextrema(b_mean_filtered, np.less_equal)[0]
-    r_emax = []
-    r_emin = []
-    g_emax = []
-    g_emin = []
-    b_emax = []
-    b_emin = []
 
     # 최대 최소 고려
     r_max = np.argmax(r_mean_filtered)
@@ -244,61 +231,50 @@ def GetPixelGraph(img, x_start, x_end, frame_type):
     #     print("BB`")
            
     # print(R, R_prime, G, G_prime, B, B_prime)
-    '''
+    
     # R, G, B graph
+    '''
     plt.subplot(411), plt.imshow(img)
     plt.subplot(412), plt.plot(r_mean, color='r'), plt.title(
         str(r_mean[r_max]) + ' ' + str(r_max) + ' ' + str(r_mean[r_min]) + ' ' + str(r_min))
     plt.axvline(x=r_max, color='r', linestyle='--')
     plt.axvline(x=r_min, color='b', linestyle='--')
     plt.axvline(x=r_median, color='g', linestyle='--')
-    for x_ in r_emax:
-        plt.axvline(x=x_, color='g', linewidth=1)
-    for x_ in r_emin:
-        plt.axvline(x=x_, color='k', linewidth=1)
+    
     plt.plot(r_mean_filtered)
     plt.subplot(413), plt.plot(g_mean, color='g'), plt.title(
         str(g_mean[g_max]) + ' ' + str(g_max) + ' ' + str(g_mean[g_min]) + ' ' + str(g_min))
     plt.axvline(x=g_max, color='r', linestyle='--')
     plt.axvline(x=g_min, color='b', linestyle='--')
     plt.axvline(x=g_median, color='g', linestyle='--')
-    for x_ in g_emax:
-        plt.axvline(x=x_, color='g', linewidth=1)
-    for x_ in g_emin:
-        plt.axvline(x=x_, color='k', linewidth=1)
+    
     plt.plot(g_mean_filtered)
     plt.subplot(414), plt.plot(b_mean, color='b'), plt.title(
         str(b_mean[b_max]) + ' ' + str(b_max) + ' ' + str(b_mean[b_min]) + ' ' + str(b_min))
     plt.axvline(x=b_max, color='r', linestyle='--')
     plt.axvline(x=b_min, color='b', linestyle='--')
     plt.axvline(x=b_median, color='g', linestyle='--')
-    for x_ in b_emax:
-        plt.axvline(x=x_, color='g', linewidth=1)
-    for x_ in b_emin:
-        plt.axvline(x=x_, color='k', linewidth=1)
+    
     plt.plot(b_mean_filtered)
     plt.tight_layout()
     plt.show()
     '''
 
-    pilot_red = []
-    pilot_green = []
-    pilot_blue = []
-
-    rgb_emax = [r_emax, g_emax, b_emax]
-    rgb_emin = [r_emin, g_emin, b_emin]
     rgb_max = [r_max, g_max, b_max]
     rgb_min = [r_min, g_min, b_min]
     rgb_pilot = [R, R_prime, G, G_prime, B, B_prime]
+    rgb_start = [r_first, g_first, b_first]
+    rgb_end = [r_second, g_second, b_second]
 
     # print(rgb_emax)
     # print(type(rgb_emax[0]))
 
-    return rgb_emax, rgb_emin, rgb_max, rgb_min, rgb_pilot, pos
+    return rgb_start, rgb_end, rgb_max, rgb_min, rgb_pilot, pos
 
-def GetColor(img, x_start, x_end, pos):
-    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+def GetColor(img, x_start, x_end, rgb_start, rgb_end, pos):
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     red, green, blue = cv2.split(img)
+ 
     b_list = []
     g_list = []
     r_list = []
@@ -306,7 +282,7 @@ def GetColor(img, x_start, x_end, pos):
     m_list = []
     ye_list = []
     for i in range(len(pos)):
-        for idx in range(x_start, pos[i] + 1):
+        for idx in range(rgb_start[i], pos[i] + 1):
             y_list = np.argwhere(red[:, idx])
             if y_list.size > 0:
                 y_start = y_list.min()
@@ -319,7 +295,7 @@ def GetColor(img, x_start, x_end, pos):
                 elif i == 2:    
                     b_list.append(blue[y_start:y_end + 1, idx].mean())
                     
-        for idx in range(pos[i] + 1, x_end + 1):
+        for idx in range(pos[i] + 1, rgb_end[i] + 1):
             y_list = np.argwhere(blue[:, idx])
             if y_list.size > 0:
                 y_start = y_list.min()
@@ -372,10 +348,39 @@ def decoding(color):
     minIdx = -1
     idx = 0
     for item in code_hls_list:
-        # diff1 = abs(item - est_h)
-        # diff2 = abs(1-diff1)
-        # diff = np.where(diff1<diff2, diff1, diff2)
-        diff = abs(item - est_h)
+        diff1 = abs(item - est_h)
+        diff2 = abs(1-diff1)
+        diff = np.where(diff1<diff2, diff1, diff2)
+        if diff < min:
+            min = diff
+            minIdx = idx
+        idx += 1
+
+    # print("Est:{0}, Candidate:{1}".format(est_h, code_hls_list[minIdx]))
+    return minIdx
+
+def decoding2(rgb_color, cmy_color):
+    est_h1, est_l1, est_s1 = colorsys.rgb_to_hls(rgb_color[0],rgb_color[1],rgb_color[2])  
+    est_h2, est_l2, est_s2 = colorsys.rgb_to_hls(cmy_color[0],cmy_color[1],cmy_color[2])  
+    # print('color :', est_h)
+    
+    est_h = (est_h1 + est_h2)/2
+    code_hls_list = []
+    for item in ColorSet:
+        h, l, s = colorsys.rgb_to_hls(item.value[0], item.value[1], item.value[2])
+        code_hls_list.append(h)
+
+    code_hls_list = np.array(code_hls_list)
+    # print(code_hls_list)
+
+    # decoding, maximum likelihood
+    min = 1.0
+    minIdx = -1
+    idx = 0
+    for item in code_hls_list:
+        diff1 = abs(item - est_h)
+        diff2 = abs(1-diff1)
+        diff = np.where(diff1<diff2, diff1, diff2)
         if diff < min:
             min = diff
             minIdx = idx
@@ -398,10 +403,7 @@ def calculateBER(origin_data_list, rx_data_list):
             origin_bit = origin_bit_list[origin_frame]
             rx_bit = origin_bit_list[rx_frame]
 
-            for origin, rx in zip(origin_bit, rx_bit):
-                if origin!=rx:
-                    be += 1
-    return fe, be
+    return fe
 
 #bit_list
 bit_dict = {
@@ -431,6 +433,8 @@ cmy_channel_matrix = [[0,0,0], [0,0,0], [0,0,0]]
 rx_data_list = list()
 rx_data_list2 = list()
 rx_data_list3 = list()
+rx_data_list4 = list()
+rx_data_list5 = list()
 
 num_frame = 0
 sync = 0
@@ -438,40 +442,56 @@ sync = 0
 ber = list()
 ber2 = list()
 ber3 = list()
+ber4 = list()
+ber5 = list()
+
+r_pos = 0
+g_pos = 0
+b_pos = 0
 for frame in frames:
     # print(frame)
     img = cv2.imread(frame)
-    rgb_emax, rgb_emin, rgb_max, rgb_min, rgb_pilot, pos = GetPixelGraph(img, 0, 339, 0)  
+    rgb_start, rgb_end, rgb_max, rgb_min, rgb_pilot, pos = GetPixelGraph(img, 0, 349, 0)  
     if sync == 0:
         if rgb_pilot == [1, 1, 0, 0, 0, 0]:
             sync += 1
-            r, g, b, c, m, y= GetColor(img, 0, 339, pos)
+            r_pos = pos[0]
+            r, g, b, c, m, y= GetColor(img, 0, 349, rgb_start, rgb_end, pos)
             rgb_channel_matrix[0] = [r, g, b]
             cmy_channel_matrix[0] = [c, m, y]
     elif sync == 1:
         if rgb_pilot == [0, 0, 1, 1, 0, 0]:
             sync += 1
-            r, g, b, c, m, y= GetColor(img, 0, 339, pos)
+            g_pos = pos[1]
+            r, g, b, c, m, y= GetColor(img, 0, 349, rgb_start, rgb_end, pos)
             rgb_channel_matrix[1] = [r, g, b]
             cmy_channel_matrix[1] = [c, m, y]
         else:
             sync = 0
+            r_pos = 0
+            g_pos	 = 0
+            b_pos = 0
             rgb_channel_matrix = [[0,0,0], [0,0,0], [0,0,0]]
             cmy_channel_matrix = [[0,0,0], [0,0,0], [0,0,0]]
     elif sync == 2:
         if rgb_pilot == [0, 0, 0, 0, 1, 1]:
             sync += 1
-            r, g, b, c, m, y= GetColor(img, 0, 339, pos)
+            b_pos = pos[2]
+            r, g, b, c, m, y= GetColor(img, 0, 349, rgb_start, rgb_end, pos)
             rgb_channel_matrix[2] = [r, g, b]
             cmy_channel_matrix[2] = [c, m, y]
             print("sync", frame)
             
         else:
             sync = 0
+            r_pos = 0
+            g_pos = 0
+            b_pos = 0
             rgb_channel_matrix = [[0,0,0], [0,0,0], [0,0,0]]
             cmy_channel_matrix = [[0,0,0], [0,0,0], [0,0,0]]
     elif sync == 3:
-        r, g, b, c, m, y = GetColor(img, 0, 339, pos)
+        rgb_pos = [r_pos, g_pos, b_pos]
+        r, g, b, c, m, y = GetColor(img, 0, 349, rgb_start, rgb_end, pos)
         rx_color = estimating(r, g, b, rgb_channel_matrix)
         rx_data = decoding(rx_color)
         rx_data_list.append(rx_data)
@@ -484,22 +504,48 @@ for frame in frames:
         rx_data3 = decoding(rx_color3)
         rx_data_list3.append(rx_data3)
         
-        # print('rx_data_list : ', rx_data_list)
+        rx_color4 = estimating(r, g, b, cmy_channel_matrix)
+        rx_data4 = decoding(rx_color4)
+        '''
+        if rx_data4 >= 4:
+            rx_data4 -= 4
+        else:
+            rx_data4 += 4
+        '''
+        rx_data_list4.append(rx_data4)
+        
+        rx_data5 = decoding2(rx_color, rx_color2)
+        rx_data_list5.append(rx_data5)
+        
+        
+        
         num_frame += 1
-
+        
     if num_frame == 27:
         sync = 0
         num_frame = 0
+        r_pos = 0
+        g_pos = 0
+        b_pos = 0
+        rgb_channel_matrix = [[0,0,0], [0,0,0], [0,0,0]]
+        cmy_channel_matrix = [[0,0,0], [0,0,0], [0,0,0]]
+        
         ber.append(calculateBER(origin_data_list, rx_data_list))
         ber2.append(calculateBER(origin_data_list, rx_data_list2))
         ber3.append(calculateBER(origin_data_list, rx_data_list3))
+        ber4.append(calculateBER(origin_data_list, rx_data_list4))
+        ber5.append(calculateBER(origin_data_list, rx_data_list5))
         rx_data_list = list()
         rx_data_list2 = list()
         rx_data_list3 = list()
+        rx_data_list4 = list()
+        rx_data_list5 = list()
         print('sync out', frame)
-    # GetPixelGraph(img, 0, 339, 0)    
+    GetPixelGraph(img, 0, 349, 0)    
     # cv2.imshow('barcode', img)
     # cv2.waitKey(0)
 print(ber)
 print(ber2)
 print(ber3)
+print(ber4)
+print(ber5)

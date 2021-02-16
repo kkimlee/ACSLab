@@ -46,7 +46,7 @@ def compare(argmax, argmin, sort):
             return argmin
 
 def GetGraph(img, x_start, x_end, pos):
-    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     red, green, blue = cv2.split(img)
     b_list = []
     g_list = []
@@ -246,7 +246,7 @@ def GetPixelGraph(img, x_start, x_end, frame_type):
     # print(R, R_prime, G, G_prime, B, B_prime)
     
     # R, G, B graph
-    
+    '''
     plt.subplot(411), plt.imshow(img)
     plt.subplot(412), plt.plot(r_mean, color='r'), plt.title(
         str(r_mean[r_max]) + ' ' + str(r_max) + ' ' + str(r_mean[r_min]) + ' ' + str(r_min))
@@ -280,7 +280,7 @@ def GetPixelGraph(img, x_start, x_end, frame_type):
     plt.plot(b_mean_filtered)
     plt.tight_layout()
     plt.show()
-    
+    '''
 
     pilot_red = []
     pilot_green = []
@@ -298,8 +298,9 @@ def GetPixelGraph(img, x_start, x_end, frame_type):
     return rgb_emax, rgb_emin, rgb_max, rgb_min, rgb_pilot, pos
 
 def GetColor(img, x_start, x_end, pos):
-    img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     red, green, blue = cv2.split(img)
+ 
     b_list = []
     g_list = []
     r_list = []
@@ -366,7 +367,7 @@ def decoding(color):
         code_hls_list.append(h)
 
     code_hls_list = np.array(code_hls_list)
-    print(code_hls_list)
+    # print(code_hls_list)
 
     # decoding, maximum likelihood
     min = 1.0
@@ -381,14 +382,14 @@ def decoding(color):
             minIdx = idx
         idx += 1
 
-    print("Est:{0}, Candidate:{1}".format(est_h, code_hls_list[minIdx]))
+    # print("Est:{0}, Candidate:{1}".format(est_h, code_hls_list[minIdx]))
     return minIdx
 
 def decoding2(rgb_color, cmy_color):
     est_h1, est_l1, est_s1 = colorsys.rgb_to_hls(rgb_color[0],rgb_color[1],rgb_color[2])  
     est_h2, est_l2, est_s2 = colorsys.rgb_to_hls(cmy_color[0],cmy_color[1],cmy_color[2])  
     # print('color :', est_h)
-  
+    
     est_h = (est_h1 + est_h2)/2
     code_hls_list = []
     for item in ColorSet:
@@ -411,7 +412,7 @@ def decoding2(rgb_color, cmy_color):
             minIdx = idx
         idx += 1
 
-    print("Est:{0}, Candidate:{1}".format(est_h, code_hls_list[minIdx]))
+    # print("Est:{0}, Candidate:{1}".format(est_h, code_hls_list[minIdx]))
     return minIdx
 
 def calculateBER(origin_data_list, rx_data_list):
@@ -428,10 +429,7 @@ def calculateBER(origin_data_list, rx_data_list):
             origin_bit = origin_bit_list[origin_frame]
             rx_bit = origin_bit_list[rx_frame]
 
-            for origin, rx in zip(origin_bit, rx_bit):
-                if origin!=rx:
-                    be += 1
-    return fe, be
+    return fe
 
 #bit_list
 bit_dict = {
@@ -470,29 +468,39 @@ ber = list()
 ber2 = list()
 ber3 = list()
 ber4 = list()
+
+r_pos = 0
+g_pos = 0
+b_pos = 0
 for frame in frames:
-    print(frame)
+    # print(frame)
     img = cv2.imread(frame)
     rgb_emax, rgb_emin, rgb_max, rgb_min, rgb_pilot, pos = GetPixelGraph(img, 0, 339, 0)  
     if sync == 0:
         if rgb_pilot == [1, 1, 0, 0, 0, 0]:
             sync += 1
+            r_pos = pos[0]
             r, g, b, c, m, y= GetColor(img, 0, 339, pos)
             rgb_channel_matrix[0] = [r, g, b]
             cmy_channel_matrix[0] = [c, m, y]
     elif sync == 1:
         if rgb_pilot == [0, 0, 1, 1, 0, 0]:
             sync += 1
+            g_pos = pos[1]
             r, g, b, c, m, y= GetColor(img, 0, 339, pos)
             rgb_channel_matrix[1] = [r, g, b]
             cmy_channel_matrix[1] = [c, m, y]
         else:
             sync = 0
+            r_pos = 0
+            g_pos = 0
+            b_pos = 0
             rgb_channel_matrix = [[0,0,0], [0,0,0], [0,0,0]]
             cmy_channel_matrix = [[0,0,0], [0,0,0], [0,0,0]]
     elif sync == 2:
         if rgb_pilot == [0, 0, 0, 0, 1, 1]:
             sync += 1
+            b_pos = pos[2]
             r, g, b, c, m, y= GetColor(img, 0, 339, pos)
             rgb_channel_matrix[2] = [r, g, b]
             cmy_channel_matrix[2] = [c, m, y]
@@ -500,9 +508,13 @@ for frame in frames:
             
         else:
             sync = 0
+            r_pos = 0
+            g_pos = 0
+            b_pos = 0
             rgb_channel_matrix = [[0,0,0], [0,0,0], [0,0,0]]
             cmy_channel_matrix = [[0,0,0], [0,0,0], [0,0,0]]
     elif sync == 3:
+        pos = [r_pos, g_pos, b_pos]
         r, g, b, c, m, y = GetColor(img, 0, 339, pos)
         rx_color = estimating(r, g, b, rgb_channel_matrix)
         rx_data = decoding(rx_color)
@@ -524,6 +536,12 @@ for frame in frames:
     if num_frame == 27:
         sync = 0
         num_frame = 0
+        r_pos = 0
+        g_pos = 0
+        b_pos = 0
+        rgb_channel_matrix = [[0,0,0], [0,0,0], [0,0,0]]
+        cmy_channel_matrix = [[0,0,0], [0,0,0], [0,0,0]]
+        
         ber.append(calculateBER(origin_data_list, rx_data_list))
         ber2.append(calculateBER(origin_data_list, rx_data_list2))
         ber3.append(calculateBER(origin_data_list, rx_data_list3))
