@@ -227,7 +227,7 @@ class MyApp(QWidget):
     
     # 데이터 프레임형태로 변
     def makeframe(self, result):
-        df = DataFrame(result, columns=['동','호수','소유자', '주소', '건물내역', '대지권비율'])
+        df = DataFrame(result, columns=['동','호수','소유자','소유자수', '주소', '건물내역', '대지권비율'])
         return df
     
     # 엑셀 파일 생성
@@ -298,12 +298,14 @@ class MyApp(QWidget):
                     host = ' '.join(host)
                     print('리스트 형태 호스트 결과 출력 :',host)
                 else:
+                    num = len(host)/2
                     host = ' '.join(host)
                 
                 # 최종 결과 데이터 생성
-                data = [d, h, host]
+                data = [d, h, host, num]
                 result.append(data)
                 print(result)
+    
     
         # 주소, 건물내역, 대지권 비율 추출
         result2 = self.extract_data(lines)
