@@ -75,7 +75,7 @@ class MyApp(QWidget):
                     # print(hosu)
         return dong, hosu
     
-    # 소유자 찾기 
+    # 소유자 찾기
     def findhost(self, line):
         line = line.split()
         for text_ind in range(len(line)) :
@@ -87,6 +87,7 @@ class MyApp(QWidget):
                     return host, birth
                 except :
                     host = line[text_ind+1]
+                    host = ''.join(host.split())
                     return host
                 
     def findshare(self, line):
@@ -351,28 +352,28 @@ class MyApp(QWidget):
 
         #갑구와 을구 사이를 구분하기 위한 카운터
         counter = 0
-    
+
         result = []
         
         # 동, 호수, 소유자 추출
         for line in lines :
             #특문제거
             line = self.cleanText(line)
-            
             #동과 호수 식별
             if '집합건물' in line:
-                # print('집합건물 식별')
                 d, h = self.donghosu(line)
                 # 마지막으로 소유권이 이전된 사람을 식별하기 위한 코드   
             if '갑' in line and '구' in line and '소유권' in line :
                 counter = 1
             
-            if '소유자' in line :
-                host = self.findhost(line)
+            if '소유자' in line:
                 counter = 1
+                host = self.findhost(line)
             elif '공유자' in line:
                 counter = 2
                 host = []
+            
+                
             if counter == 2 and '지분' in line :
                 jiboon = 1
                 
@@ -387,7 +388,7 @@ class MyApp(QWidget):
             elif counter == 2 and '증여' in line:
                 share = self.findshare(line)
                 host.append(share)
-
+            
             if '을' in line and '구' in line and '소유권' in line :
                 counter = 0
                 jiboon = 0
@@ -396,15 +397,20 @@ class MyApp(QWidget):
                     num = len(host)
                     host = ' '.join(host)
                     print('리스트 형태 호스트 결과 출력 :',host)
+                    
                 else:
-                    num = len(host)/2
-                    host = ' '.join(host)
-
+                    if str(type(host)) == "<class 'str'>":
+                        num = 1
+                        host = ''.join(host)
+                    else:
+                        num = len(host)/2                
+                        host = ' '.join(host)
+                        
                 
                 # 최종 결과 데이터 생성
                 data = [d, h, host, num]
                 result.append(data)
-                # print(result)
+
     
     
         # 주소, 건물내역, 대지권 비율 추출
