@@ -103,6 +103,8 @@ motor_model.fit(x=train_motor_data, y=train_motor_data_label, batch_size=10, epo
 motor_model_pred = motor_model.predict(test_motor_data)
 motor_model_test_loss, motor_model_test_acc = motor_model.evaluate(test_motor_data, test_motor_data_label, verbose=1)
 
+motor_model.save('dl_motor_model.h5')
+
 cover_model = create_model()
 cover_model.summary()
 cover_model.compile(optimizer=Adam(lr=0.0005),
@@ -112,3 +114,5 @@ cover_model.compile(optimizer=Adam(lr=0.0005),
 cover_model.fit(x=train_cover_data, y=train_cover_data_label, batch_size=10, epochs=20)
 cover_modelpred = cover_model.predict(test_cover_data)
 cover_model_test_loss, cover_model_test_acc = cover_model.evaluate(test_cover_data, test_cover_data_label, verbose=1)
+
+cover_model.save('dl_cover_model.h5')
