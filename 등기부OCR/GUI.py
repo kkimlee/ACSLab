@@ -26,10 +26,15 @@ class MyApp(QWidget):
         self.excel_button = QPushButton('엑셀 변환')
         self.excel_button.clicked.connect(self.convert_to_excel)
         
+        # 한글 변환 버튼
+        self.hangul_button = QPushButton('한글 변환')
+        self.hangul_button.clicked.connect(self.convert_to_hangul)
+        
         # 레이아웃
         layout = QVBoxLayout()
         layout.addWidget(self.file_button)
         layout.addWidget(self.excel_button)
+        layout.addWidget(self.hangul_button)
         layout.addWidget(self.label)
         
         self.setLayout(layout)
@@ -64,10 +69,10 @@ class MyApp(QWidget):
         for text in line:
             if text.startswith('제') and text.endswith('동') :
                     dong = text[1:3]
-                    print(dong)
+                    # print(dong)
             if text.startswith('제') and text.endswith('호') :
                     hosu = text[1:4]
-                    print(hosu)
+                    # print(hosu)
         return dong, hosu
     
     # 소유자 찾기 
@@ -90,7 +95,11 @@ class MyApp(QWidget):
     
     
     def remove_data(self, line):
-        if line.find('거래가액') <  0 and line.find('을 구') < 0 and line.find('부동산등기법') < 0 and line.find('말소사항') < 0 and line.find('*******') < 0:
+        if line.find('거래가액') <  0 and line.find('을 구') < 0 and \
+            line.find('부동산등기법') < 0 and line.find('말소사항') < 0 and \
+            line.find('*******') < 0  and line.find('청구금액') < 0 and \
+            line.find('금지사항') < 0 and line.find('지분') < 0 and \
+            line.find('성명') < 0:
             return True
         else:
             return False
@@ -100,7 +109,10 @@ class MyApp(QWidget):
         remove = list()
         idx = 0
         for line in lines:
-            if line.find('발행번호') >= 0 or line.find('집합건물') >= 0 or line.find('/') >= 0 or line.find('순위번호') >= 0 or len(line)==2:
+            if line.find('발행번호') >= 0 or line.find('집합건물') >= 0 or \
+                line.find('/') >= 0 or line.find('순위번호') >= 0 or \
+                len(line)==2 or line.find('열 람 용') >= 0 or \
+                line.find('열람일시') >= 0:
                 remove.append(idx)
             idx += 1
     
@@ -150,8 +162,12 @@ class MyApp(QWidget):
             address_idx = 0
             idx = address_start_idx
             for line in ho[i][address_start_idx:address_end_idx]:
-                if line.find('전거') >= 0 or line.find('매매') >= 0 or line.find('증여') >= 0 or line.find('상속') >= 0:
-                    address_idx = idx
+                if line.find('전거') >= 0 or line.find('매매') >= 0 or \
+                   line.find('증여') >= 0 or line.find('상속') >= 0 or \
+                   line.find('낙찰') >= 0:
+                   
+                    if line.find('매매예약') < 0:
+                        address_idx = idx
                 idx += 1
     
             address = ''
@@ -168,7 +184,7 @@ class MyApp(QWidget):
                 if ho[i][address_idx-1].find('공유자') >= 0:
                     address = ho[i][address_idx+2]
                 
-                    idx = 0   
+                    idx = 2
                     while(True):
                         idx += 1
                         if self.remove_data(ho[i][address_idx+idx]):
@@ -190,8 +206,51 @@ class MyApp(QWidget):
 
             # 가장 마지막 기록이 '증여'일 경우
             if ho[i][address_idx].find('증여') >= 0:
-                temp_idx = ho[i][address_idx].find('증여')
-                address = ho[i][address_idx][temp_idx+3:-1]
+                if ho[i][address_idx-1].find('공유자') >= 0:
+                    if ho[i][address_idx-1].find('지분') >= 0:
+                        address = ho[i][address_idx+1]
+                        
+                        idx = 1
+                        while(True):
+                            idx += 1
+                            if self.remove_data(ho[i][address_idx+idx]):
+                                address += ho[i][address_idx+idx][:-1]
+                            else:
+                                break
+                    else:    
+                        address = ho[i][address_idx+2]
+                    
+                        idx = 2
+                        while(True):
+                            idx += 1
+                            if self.remove_data(ho[i][address_idx+idx]):
+                                address += ho[i][address_idx+idx][:-1]
+                            else:
+                                break
+                else:
+                    temp_idx = ho[i][address_idx].find('증여')
+                    address = ho[i][address_idx][temp_idx+3:-1]
+                
+                    idx = 0 
+                    while(True):
+                        idx += 1
+                        if self.remove_data(ho[i][address_idx+idx]):
+                            address += ho[i][address_idx+idx][:-1]
+                        else:
+                            break
+            
+            # 가장 마지막 기록이 '상속'일 경우
+            if ho[i][address_idx].find('상속') >= 0:
+                if ho[i][address_idx-1].find('협의분할에') >= 0:
+                    temp_idx = ho[i][address_idx-1].find('협의분할에')
+                    address = ho[i][address_idx-1][temp_idx+6:-1]
+                
+                if ho[i][address_idx-1].find('협의분할') >= 0:
+                    temp_idx = ho[i][address_idx-1].find('협의분할')
+                    address = ho[i][address_idx-1][temp_idx+5:-1]
+                    
+                temp_idx = ho[i][address_idx].find('상속')
+                address += ho[i][address_idx][temp_idx+2:-1]
                 
                 idx = 0 
                 while(True):
@@ -201,14 +260,25 @@ class MyApp(QWidget):
                     else:
                         break
             
-            # 가장 마지막 기록이 '상속'일 경우
-            if ho[i][address_idx].find('상속') >= 0:
-                temp_idx = ho[i][address_idx-1].find('협의분할에')
+            # 가장 마지막 기록이 '낙찰'일 경우
+            if ho[i][address_idx].find('낙찰') >= 0:
+                temp_idx = ho[i][address_idx-1].find('임의경매로')
                 address = ho[i][address_idx-1][temp_idx+6:-1]
                 
-                temp_idx = ho[i][address_idx].find('상속')
+                temp_idx = ho[i][address_idx].find('낙찰')
                 address += ho[i][address_idx][temp_idx+2:-1]
+                
+                idx = 0 
+                while(True):
+                    idx += 1
+                    if self.remove_data(ho[i][address_idx+idx]):
+                        address += ho[i][address_idx+idx][:-1]
+                    else:
+                        break
+                    
             data.append(address)
+            
+            
             
             for line in ho[i][headline_idx:address_start_idx]:
                 # 면적 추출
@@ -220,7 +290,7 @@ class MyApp(QWidget):
                     temp_str = line[line.find('소유권대지권'):]
                     owned_land = temp_str.split(' ')[1:3]
                     data.append(owned_land[0] + owned_land[1])
-                
+            
             data_list.append(data)
         
         return data_list
@@ -256,7 +326,7 @@ class MyApp(QWidget):
     
     # 데이터 추출 
     def showFile_1(self, filename):
-        f = open(filename, 'r')
+        f = open(filename, 'r', encoding='utf-8')
         lines = f.readlines()
 
         #갑구와 을구 사이를 구분하기 위한 카운터
@@ -271,8 +341,9 @@ class MyApp(QWidget):
             
             #동과 호수 식별
             if '집합건물' in line:
-                print('집합건물 식별')
+                # print('집합건물 식별')
                 d, h = self.donghosu(line)
+                print(h)
                 # 마지막으로 소유권이 이전된 사람을 식별하기 위한 코드   
             if '갑' in line and '구' in line and '소유권' in line :
                 counter = 1
@@ -292,11 +363,11 @@ class MyApp(QWidget):
             if '을' in line and '구' in line and '소유권' in line :
                 counter = 0
                 jiboon = 0
-                print(type(host))
+                # print(type(host))
                 # 결과가 공유자일 시 리스트를 텍스트로 변환
                 if str(type(host)) == "<class 'list'>":
                     host = ' '.join(host)
-                    print('리스트 형태 호스트 결과 출력 :',host)
+                    # print('리스트 형태 호스트 결과 출력 :',host)
                 else:
                     num = len(host)/2
                     host = ' '.join(host)
@@ -304,7 +375,7 @@ class MyApp(QWidget):
                 # 최종 결과 데이터 생성
                 data = [d, h, host, num]
                 result.append(data)
-                print(result)
+                # print(result)
     
     
         # 주소, 건물내역, 대지권 비율 추출
@@ -314,24 +385,28 @@ class MyApp(QWidget):
         concat_result = list()
         for concat1, concat2 in zip(result, result2):
             concat_result.append(concat1+concat2)
-        print(concat_result)
+        # print(concat_result)
     
         f.close()
     
         # 데이터 프레임 생성
         deungi = self.makeframe(concat_result)
-        print(deungi)
+        # print(deungi)
     
         # 데이터 프레임을 엑셀로 저장
         self.makeexcel(deungi)
     
     # 엑셀로 변환 버튼 클릭
     def convert_to_excel(self):
-        print(self.fname[0])
+        # print(self.fname[0])
         #file_name = self.fname[0].split('/')[-1]
         file_name = self.fname[0]
-        print(file_name)
+        # print(file_name)
         self.showFile_1(self.fname[0])
+        
+    # 한글로 변환 버튼 클릭
+    def convert_to_hangul(self):
+        test
         
 if __name__ == '__main__':
     app = QApplication(sys.argv)
