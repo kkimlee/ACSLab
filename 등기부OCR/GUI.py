@@ -326,8 +326,12 @@ class MyApp(QWidget):
     
     # 데이터 추출 
     def showFile_1(self, filename):
-        f = open(filename, 'r', encoding='utf-8')
-        lines = f.readlines()
+        f = open(filename, 'r')
+        try:
+            lines = f.readlines()
+        except:
+            f = open(filename, 'r', encoding='utf-8')
+            lines = f.readlines()
 
         #갑구와 을구 사이를 구분하기 위한 카운터
         counter = 0
