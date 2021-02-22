@@ -80,11 +80,15 @@ class MyApp(QWidget):
         line = line.split()
         for text_ind in range(len(line)) :
             if line[text_ind] == '소유자' :
-                host = line[text_ind+1]
-                birth = line[text_ind+2]
-                birth = birth[0:2]
-        return host, birth
-    
+                try :
+                    host = line[text_ind+1]
+                    birth = line[text_ind+2]
+                    birth = birth[0:2]
+                    return host, birth
+                except :
+                    host = line[text_ind+1]
+                    return host
+                
     def findshare(self, line):
         line = line.split()
         
@@ -99,7 +103,7 @@ class MyApp(QWidget):
             line.find('부동산등기법') < 0 and line.find('말소사항') < 0 and \
             line.find('*******') < 0  and line.find('청구금액') < 0 and \
             line.find('금지사항') < 0 and line.find('지분') < 0 and \
-            line.find('성명') < 0:
+            line.find('성명') < 0 and line.find('주소') < 0:
             return True
         else:
             return False
@@ -193,16 +197,28 @@ class MyApp(QWidget):
                             break
                         
                 if ho[i][address_idx-1].find('소유자') >= 0:
-                    temp_idx = ho[i][address_idx].find('매매')
-                    address = ho[i][address_idx][temp_idx+3:-1]
+                    owner_idx = ho[i][address_idx-1].find('소유자')
+                    owner = ho[i][address_idx-1][owner_idx:].split()[1]
+                    if (len(owner) > 10):
+                        print(owner)
+                        idx = 0
+                        while(True):
+                            idx += 1
+                            if self.remove_data(ho[i][address_idx+idx]):
+                                address += ho[i][address_idx+idx][:-1]
+                            else:
+                                break
+                    else:
+                        temp_idx = ho[i][address_idx].find('매매')
+                        address = ho[i][address_idx][temp_idx+3:-1]
                     
-                    idx = 0         
-                    while(True):
-                        idx += 1
-                        if self.remove_data(ho[i][address_idx+idx]):
-                            address += ho[i][address_idx+idx][:-1]
-                        else:
-                            break
+                        idx = 0         
+                        while(True):
+                            idx += 1
+                            if self.remove_data(ho[i][address_idx+idx]):
+                                address += ho[i][address_idx+idx][:-1]
+                            else:
+                                break
 
             # 가장 마지막 기록이 '증여'일 경우
             if ho[i][address_idx].find('증여') >= 0:
@@ -347,7 +363,6 @@ class MyApp(QWidget):
             if '집합건물' in line:
                 # print('집합건물 식별')
                 d, h = self.donghosu(line)
-                print(h)
                 # 마지막으로 소유권이 이전된 사람을 식별하기 위한 코드   
             if '갑' in line and '구' in line and '소유권' in line :
                 counter = 1
@@ -358,23 +373,33 @@ class MyApp(QWidget):
             elif '공유자' in line:
                 counter = 2
                 host = []
-            if counter == 2 and '지분' in line:
+            if counter == 2 and '지분' in line :
                 jiboon = 1
+                
             if counter == 2 and len(line.split()) == 2 and jiboon == 1:
                 share = self.findshare(line)
                 host.append(share)
                 jiboon = 0
+            elif counter == 2 and '이전' in line and '매매' in line and jiboon == 1:
+                share = self.findshare(line)
+                host.append(share)
+                jiboon = 0
+            elif counter == 2 and '증여' in line:
+                share = self.findshare(line)
+                host.append(share)
+
             if '을' in line and '구' in line and '소유권' in line :
                 counter = 0
                 jiboon = 0
-                # print(type(host))
                 # 결과가 공유자일 시 리스트를 텍스트로 변환
                 if str(type(host)) == "<class 'list'>":
+                    num = len(host)
                     host = ' '.join(host)
-                    # print('리스트 형태 호스트 결과 출력 :',host)
+                    print('리스트 형태 호스트 결과 출력 :',host)
                 else:
                     num = len(host)/2
                     host = ' '.join(host)
+
                 
                 # 최종 결과 데이터 생성
                 data = [d, h, host, num]
