@@ -1,11 +1,6 @@
 import joblib
-import pickle
+from tensorflow.keras.models import load_model
 
-
-from tensorflow.keras import utils
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.models import Model, Sequential, load_model
-from tensorflow.keras.layers import Dense, Conv1D, Conv2D, MaxPooling1D, MaxPooling2D, Input, Flatten, concatenate
 
 class model:
     def __init__(self):
