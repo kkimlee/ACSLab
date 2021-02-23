@@ -470,7 +470,6 @@ class MyApp(QWidget):
         
         for i in range(len(owner)):
             hwp.HAction.Run("TableAppendRow")
-            # hwp.HAction.Run("TableRightCellAppend")
             hwp.HAction.Run("MoveLeft");
             hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
             hwp.HParameterSet.HInsertText.Text = owner[i]
