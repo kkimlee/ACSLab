@@ -14,7 +14,7 @@ class MyApp(QWidget):
         
     def initUI(self):
         # 제목 입력
-        self.setWindowTitle('엑셀 변환기')
+        self.setWindowTitle('데이터 추출기')
         # 위젯의 크기 지정
         self.resize(400, 200)
         # 위젯의 위치 지정
@@ -433,7 +433,6 @@ class MyApp(QWidget):
         
         
         return deungi
-        # 데이터 프레임을 엑셀로 저장
     
     # 엑셀로 변환 버튼 클릭
     def convert_to_excel(self):
@@ -444,13 +443,12 @@ class MyApp(QWidget):
     # 한글로 변환 버튼 클릭
     def convert_to_hangul(self):
         deungi = self.showFile_1(self.fname[0])
-        string = self.fname[0].split('/')[:-1]
         path = os.getcwd()
         owner = list(deungi['소유자'])
         address = list(deungi['주소'])
         
         hwp = win32.gencache.EnsureDispatch("HWPFrame.HwpObject")
-        hwp.XHwpWindows.Item(0).Visible = False
+        hwp.XHwpWindows.Item(0).Visible = True
         hwp.HAction.GetDefault("TableCreate", hwp.HParameterSet.HTableCreation.HSet)
         hwp.HParameterSet.HTableCreation.Rows = 1
         hwp.HParameterSet.HTableCreation.Cols = 2
