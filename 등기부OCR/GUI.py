@@ -449,6 +449,15 @@ class MyApp(QWidget):
         
         hwp = win32.gencache.EnsureDispatch("HWPFrame.HwpObject")
         hwp.XHwpWindows.Item(0).Visible = True
+        for i in range(len(owner)):
+            hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
+            string = '소유자 : ' + owner[i] + ' 주소 : ' + address[i]
+            hwp.HParameterSet.HInsertText.Text = string
+            hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
+            if i < len(owner)-1:
+                hwp.HAction.Run("BreakPage");
+        
+        '''
         hwp.HAction.GetDefault("TableCreate", hwp.HParameterSet.HTableCreation.HSet)
         hwp.HParameterSet.HTableCreation.Rows = 1
         hwp.HParameterSet.HTableCreation.Cols = 2
@@ -476,7 +485,7 @@ class MyApp(QWidget):
             hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
             hwp.HParameterSet.HInsertText.Text = address[i]
             hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
-        
+        '''
         hwp.SaveAs(path + '/등기부등본.hwp')
         hwp.Quit()
         
