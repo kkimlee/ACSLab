@@ -1,8 +1,11 @@
+import os
 import re
 import sys
-from PyQt5.QtWidgets import *
-from pandas import Series, DataFrame
 import openpyxl
+from pandas import Series, DataFrame
+
+from PyQt5.QtWidgets import *
+import win32com.client as win32
 
 class MyApp(QWidget):
     def __init__(self):
@@ -427,21 +430,58 @@ class MyApp(QWidget):
         # 데이터 프레임 생성
         deungi = self.makeframe(concat_result)
         # print(deungi)
-    
+        
+        
+        return deungi
         # 데이터 프레임을 엑셀로 저장
-        self.makeexcel(deungi)
     
     # 엑셀로 변환 버튼 클릭
     def convert_to_excel(self):
-        # print(self.fname[0])
-        #file_name = self.fname[0].split('/')[-1]
-        file_name = self.fname[0]
-        # print(file_name)
-        self.showFile_1(self.fname[0])
+        deungi = self.showFile_1(self.fname[0])
+        
+        self.makeexcel(deungi)
         
     # 한글로 변환 버튼 클릭
     def convert_to_hangul(self):
-        test
+        deungi = self.showFile_1(self.fname[0])
+        string = self.fname[0].split('/')[:-1]
+        path = os.getcwd()
+        owner = list(deungi['소유자'])
+        address = list(deungi['주소'])
+        
+        hwp = win32.gencache.EnsureDispatch("HWPFrame.HwpObject")
+        hwp.XHwpWindows.Item(0).Visible = False
+        hwp.HAction.GetDefault("TableCreate", hwp.HParameterSet.HTableCreation.HSet)
+        hwp.HParameterSet.HTableCreation.Rows = 1
+        hwp.HParameterSet.HTableCreation.Cols = 2
+        hwp.HParameterSet.HTableCreation.WidthValue = hwp.MiliToHwpUnit(0.0)
+        hwp.HParameterSet.HTableCreation.HeightValue = hwp.MiliToHwpUnit(0.0)
+        hwp.HParameterSet.HTableCreation.CreateItemArray("ColWidth", 2)
+        hwp.HParameterSet.HTableCreation.CreateItemArray("RowHeight", 1)
+        hwp.HParameterSet.HTableCreation.TableProperties.Width = 41954
+        hwp.HAction.Execute("TableCreate", hwp.HParameterSet.HTableCreation.HSet)
+        hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
+        hwp.HParameterSet.HInsertText.Text = "소유자"
+        hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
+        hwp.HAction.Run("TableRightCellAppend")
+        hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
+        hwp.HParameterSet.HInsertText.Text = "주소"
+        hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
+        
+        for i in range(len(owner)):
+            hwp.HAction.Run("TableAppendRow")
+            # hwp.HAction.Run("TableRightCellAppend")
+            hwp.HAction.Run("MoveLeft");
+            hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
+            hwp.HParameterSet.HInsertText.Text = owner[i]
+            hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
+            hwp.HAction.Run("TableRightCellAppend")
+            hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
+            hwp.HParameterSet.HInsertText.Text = address[i]
+            hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
+        
+        hwp.SaveAs(path + '/등기부등본.hwp')
+        hwp.Quit()
         
 if __name__ == '__main__':
     app = QApplication(sys.argv)
