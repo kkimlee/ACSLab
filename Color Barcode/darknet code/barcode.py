@@ -188,45 +188,81 @@ def GetPixelGraph(img, x_start, x_end, frame_type):
     # 파일럿 위치 추정
     pos = [r_median, g_median, b_median]
     
-    R = 0
-    R_prime = 0
+    # RR` 패턴
+    R_1 = 0
+    R_prime_1 = 0
+    # XRR` 패턴
+    R_2 = 0
+    R_prime_2 = 0
     # R 찾기
     if r_mean_filtered[r_first] > r_mean_filtered[r_median] and \
        g_mean_filtered[g_first] < g_mean_filtered[g_median] and \
        b_mean_filtered[b_first] < b_mean_filtered[b_median]:
-        R = 1
+        R_1 = 1
+    elif r_mean_filtered[r_second] > r_mean_filtered[r_median] and \
+         g_mean_filtered[g_second] < g_mean_filtered[g_median] and \
+         b_mean_filtered[b_second] < b_mean_filtered[b_median]:
+          R_2 = 1
     if r_mean_filtered[r_second] < r_mean_filtered[r_median] and \
        g_mean_filtered[g_second] > g_mean_filtered[g_median] and \
        b_mean_filtered[b_second] > b_mean_filtered[b_median]:
-        R_prime = 1
+        R_prime_1 = 1
+    elif r_mean_filtered[r_first] < r_mean_filtered[r_median] and \
+         g_mean_filtered[g_first] > g_mean_filtered[g_median] and \
+         b_mean_filtered[b_first] > b_mean_filtered[b_median]:
+          R_prime_2 = 1
     # if R and R_prime:
     #     print("RR`")
     
-    G = 0
-    G_prime = 0
+    # GG` 패턴
+    G_1 = 0
+    G_prime_1 = 0
+    # R`GG` 패턴
+    G_2 = 0
+    G_prime_2 = 0
     # G 찾기
     if r_mean_filtered[r_first] < r_mean_filtered[r_median] and \
        g_mean_filtered[g_first] > g_mean_filtered[g_median] and \
        b_mean_filtered[b_first] < b_mean_filtered[b_median]:
-        G = 1
+        G_1 = 1
+    elif r_mean_filtered[r_second] < r_mean_filtered[r_median] and \
+         g_mean_filtered[g_second] > g_mean_filtered[g_median] and \
+         b_mean_filtered[b_second] < b_mean_filtered[b_median]:
+          G_2 = 1
     if r_mean_filtered[r_second] > r_mean_filtered[r_median] and \
        g_mean_filtered[g_second] < g_mean_filtered[g_median] and \
        b_mean_filtered[b_second] > b_mean_filtered[b_median]:
-        G_prime = 1
+        G_prime_1 = 1
+    elif r_mean_filtered[r_first] > r_mean_filtered[r_median] and \
+         g_mean_filtered[g_first] < g_mean_filtered[g_median] and \
+         b_mean_filtered[b_first] > b_mean_filtered[b_median]:
+          G_prime_2 = 1
     # if G and G_prime:
     #     print("GG`")
-        
-    B = 0
-    B_prime = 0
+    
+    # BB` 패턴
+    B_1 = 0
+    B_prime_1 = 0
+    # G`BB`X 패턴
+    B_2 = 0
+    B_prime_2 = 0
     # B 찾기
     if r_mean_filtered[r_first] < r_mean_filtered[r_median] and \
        g_mean_filtered[g_first] < g_mean_filtered[g_median] and \
        b_mean_filtered[b_first] > b_mean_filtered[b_median]:
-        B = 1
+        B_1 = 1
+    elif r_mean_filtered[r_second] < r_mean_filtered[r_median] and \
+         g_mean_filtered[g_second] < g_mean_filtered[g_median] and \
+         b_mean_filtered[b_second] > b_mean_filtered[b_median]:
+          B_2 = 1
     if r_mean_filtered[r_second] > r_mean_filtered[r_median] and \
        g_mean_filtered[g_second] > g_mean_filtered[g_median] and \
        b_mean_filtered[b_second] < b_mean_filtered[b_median]:
-        B_prime = 1
+        B_prime_1 = 1
+    elif r_mean_filtered[r_first] > r_mean_filtered[r_median] and \
+         g_mean_filtered[g_first] > g_mean_filtered[g_median] and \
+         b_mean_filtered[b_first] < b_mean_filtered[b_median]:
+          B_prime_2 = 1
     # if B and B_prime:
     #     print("BB`")
            
@@ -262,14 +298,16 @@ def GetPixelGraph(img, x_start, x_end, frame_type):
 
     rgb_max = [r_max, g_max, b_max]
     rgb_min = [r_min, g_min, b_min]
-    rgb_pilot = [R, R_prime, G, G_prime, B, B_prime]
+    rgb_pilot_1 = [R_1, R_prime_1, G_1, G_prime_1, B_1, B_prime_1]
+    rgb_pilot_2 = [R_2, R_prime_2, G_2, G_prime_2, B_2, B_prime_2]
     rgb_start = [r_first, g_first, b_first]
     rgb_end = [r_second, g_second, b_second]
 
     # print(rgb_emax)
     # print(type(rgb_emax[0]))
-
-    return rgb_start, rgb_end, rgb_max, rgb_min, rgb_pilot, pos
+    print(rgb_pilot_1)
+    print(rgb_pilot_2)
+    return rgb_start, rgb_end, rgb_max, rgb_min, rgb_pilot_1, rgb_pilot_2, pos
 
 def GetColor(img, x_start, x_end, rgb_start, rgb_end, pos):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -314,7 +352,7 @@ def GetColor(img, x_start, x_end, rgb_start, rgb_end, pos):
     c_mean = np.array(c_list).mean()
     m_mean = np.array(m_list).mean()
     y_mean = np.array(ye_list).mean()
-
+    
     return r_mean, g_mean, b_mean, c_mean, m_mean, y_mean
 
 def estimating(r, g, b, channel_matrix, pseudo=False):
