@@ -1,8 +1,11 @@
+import os
 import re
 import sys
-from PyQt5.QtWidgets import *
-from pandas import Series, DataFrame
 import openpyxl
+from pandas import Series, DataFrame
+
+from PyQt5.QtWidgets import *
+import win32com.client as win32
 
 class MyApp(QWidget):
     def __init__(self):
@@ -11,7 +14,7 @@ class MyApp(QWidget):
         
     def initUI(self):
         # 제목 입력
-        self.setWindowTitle('엑셀 변환기')
+        self.setWindowTitle('데이터 추출기')
         # 위젯의 크기 지정
         self.resize(400, 200)
         # 위젯의 위치 지정
@@ -30,11 +33,31 @@ class MyApp(QWidget):
         self.hangul_button = QPushButton('한글 변환')
         self.hangul_button.clicked.connect(self.convert_to_hangul)
         
+        # 한글 양식 1번
+        self.hangul_form_1 = QPushButton('한글 양식 1')
+        self.hangul_form_1.clicked.connect(self.convert_to_hangul_form_1)
+        
+        # 한글 양식 2번
+        self.hangul_form_2 = QPushButton('한글 양식 2')
+        self.hangul_form_2.clicked.connect(self.convert_to_hangul_form_2)
+        
+        # 한글 양식 3번
+        self.hangul_form_3 = QPushButton('한글 양식 3')
+        self.hangul_form_3.clicked.connect(self.convert_to_hangul_form_3)
+        
+        # 한글 양식 4번
+        self.hangul_form_4 = QPushButton('한글 양식 4')
+        self.hangul_form_4.clicked.connect(self.convert_to_hangul_form_4)
+        
         # 레이아웃
         layout = QVBoxLayout()
         layout.addWidget(self.file_button)
         layout.addWidget(self.excel_button)
         layout.addWidget(self.hangul_button)
+        layout.addWidget(self.hangul_form_1)
+        layout.addWidget(self.hangul_form_2)
+        layout.addWidget(self.hangul_form_3)
+        layout.addWidget(self.hangul_form_4)
         layout.addWidget(self.label)
         
         self.setLayout(layout)
@@ -427,21 +450,374 @@ class MyApp(QWidget):
         # 데이터 프레임 생성
         deungi = self.makeframe(concat_result)
         # print(deungi)
-    
-        # 데이터 프레임을 엑셀로 저장
-        self.makeexcel(deungi)
+        
+        
+        return deungi
     
     # 엑셀로 변환 버튼 클릭
     def convert_to_excel(self):
-        # print(self.fname[0])
-        #file_name = self.fname[0].split('/')[-1]
-        file_name = self.fname[0]
-        # print(file_name)
-        self.showFile_1(self.fname[0])
+        deungi = self.showFile_1(self.fname[0])
+        
+        self.makeexcel(deungi)
         
     # 한글로 변환 버튼 클릭
     def convert_to_hangul(self):
-        test
+        deungi = self.showFile_1(self.fname[0])
+        path = os.getcwd()
+        owner = list(deungi['소유자'])
+        address = list(deungi['주소'])
+        
+        hwp = win32.gencache.EnsureDispatch("HWPFrame.HwpObject")
+        hwp.XHwpWindows.Item(0).Visible = True
+        for i in range(len(owner)):
+            hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
+            string = '소유자 : ' + owner[i] + ' 주소 : ' + address[i]
+            hwp.HParameterSet.HInsertText.Text = string
+            hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
+            if i < len(owner)-1:
+                hwp.HAction.Run("BreakPage");
+        
+        # 표 만들기
+        '''
+        hwp.HAction.GetDefault("TableCreate", hwp.HParameterSet.HTableCreation.HSet)
+        hwp.HParameterSet.HTableCreation.Rows = 1
+        hwp.HParameterSet.HTableCreation.Cols = 2
+        hwp.HParameterSet.HTableCreation.WidthValue = hwp.MiliToHwpUnit(0.0)
+        hwp.HParameterSet.HTableCreation.HeightValue = hwp.MiliToHwpUnit(0.0)
+        hwp.HParameterSet.HTableCreation.CreateItemArray("ColWidth", 2)
+        hwp.HParameterSet.HTableCreation.CreateItemArray("RowHeight", 1)
+        hwp.HParameterSet.HTableCreation.TableProperties.Width = 41954
+        hwp.HAction.Execute("TableCreate", hwp.HParameterSet.HTableCreation.HSet)
+        hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
+        hwp.HParameterSet.HInsertText.Text = "소유자"
+        hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
+        hwp.HAction.Run("TableRightCellAppend")
+        hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
+        hwp.HParameterSet.HInsertText.Text = "주소"
+        hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
+        
+        for i in range(len(owner)):
+            hwp.HAction.Run("TableAppendRow")
+            hwp.HAction.Run("MoveLeft");
+            hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
+            hwp.HParameterSet.HInsertText.Text = owner[i]
+            hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
+            hwp.HAction.Run("TableRightCellAppend")
+            hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
+            hwp.HParameterSet.HInsertText.Text = address[i]
+            hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
+        '''
+        hwp.SaveAs(path + '/등기부등본.hwp')
+        hwp.Quit()
+             
+    # 한글양식으로 변환 버튼 클릭
+    def convert_to_hangul_form_1(self):
+        path = os.getcwd()
+        deungi = self.showFile_1(self.fname[0])
+        owner = list(deungi['소유자'])
+        address = list(deungi['주소'])
+        
+        
+        hwp = win32.gencache.EnsureDispatch("HWPFrame.HwpObject")
+        hwp.XHwpWindows.Item(0).Visible = True
+        hwp.Open(path + '/서면결의서.hwp')
+        
+        hwp.HAction.Run("MoveTopLevelBegin")
+        hwp.HAction.Run("SelectAll")
+        hwp.HAction.Run("Copy")
+        hwp.HAction.Run("MoveLineBegin")
+        hwp.HAction.Run("MoveDown")
+        hwp.HAction.Run("MoveDown")
+        hwp.HAction.Run("MoveDown")
+        hwp.HAction.Run("TableRightCellAppend")
+        hwp.HAction.Run("TableRightCellAppend")
+        hwp.HAction.Run("TableRightCellAppend")
+        hwp.HAction.Run("TableRightCellAppend")
+        hwp.HAction.Run("TableRightCellAppend")
+        hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
+        hwp.HParameterSet.HInsertText.Text = owner[0]
+        hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
+        hwp.HAction.Run("TableRightCellAppend")
+        hwp.HAction.Run("TableRightCellAppend")
+        hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
+        hwp.HParameterSet.HInsertText.Text = "생년월일"
+        hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
+        hwp.HAction.Run("TableRightCellAppend")
+        hwp.HAction.Run("TableRightCellAppend")
+        hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
+        hwp.HParameterSet.HInsertText.Text = address[0]
+        hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
+        
+        for i in range(len(deungi) - 1):
+            hwp.HAction.Run("MoveDown")
+            hwp.HAction.Run("MoveViewDown");
+            hwp.HAction.Run("MoveViewDown");
+            hwp.HAction.Run("BreakPage")
+            hwp.HAction.GetDefault("Paste", hwp.HParameterSet.HSelectionOpt.HSet)
+            hwp.HAction.Execute("Paste", hwp.HParameterSet.HSelectionOpt.HSet)
+            hwp.HAction.Run("MovePageUp")
+            hwp.HAction.Run("MoveDown")
+            hwp.HAction.Run("MoveDown")
+            hwp.HAction.Run("MoveDown")
+            hwp.HAction.Run("TableRightCellAppend")
+            hwp.HAction.Run("TableRightCellAppend")
+            hwp.HAction.Run("TableRightCellAppend")
+            hwp.HAction.Run("TableRightCellAppend")
+            hwp.HAction.Run("TableRightCellAppend")
+            hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
+            hwp.HParameterSet.HInsertText.Text = owner[0]
+            hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
+            hwp.HAction.Run("TableRightCellAppend")
+            hwp.HAction.Run("TableRightCellAppend")
+            hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
+            hwp.HParameterSet.HInsertText.Text = "생년월일"
+            hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
+            hwp.HAction.Run("TableRightCellAppend")
+            hwp.HAction.Run("TableRightCellAppend")
+            hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
+            hwp.HParameterSet.HInsertText.Text = address[0]
+            hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
+            
+        # hwp.Quit()
+        
+        # 한글양식으로 변환 버튼 클릭
+    def convert_to_hangul_form_2(self):
+        path = os.getcwd()
+        deungi = self.showFile_1(self.fname[0])
+        owner = list(deungi['소유자'])
+        address = list(deungi['주소'])
+        
+        hwp = win32.gencache.EnsureDispatch("HWPFrame.HwpObject")
+        hwp.XHwpWindows.Item(0).Visible = True
+        hwp.Open(path + '/[별지  제6호 서식]안전진단 요청을 위한 동의서.hwp')
+        
+        hwp.HAction.Run("MoveTopLevelBegin")
+        hwp.HAction.Run("SelectAll")
+        hwp.HAction.Run("Copy")
+        hwp.HAction.Run("MoveLineBegin")
+        hwp.HAction.Run("MoveRight")
+        hwp.HAction.Run("TableRightCell")
+        hwp.HAction.Run("TableRightCell")
+        hwp.HAction.Run("TableRightCell")
+        hwp.HAction.Run("TableRightCell")
+        hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
+        hwp.HParameterSet.HInsertText.Text = owner[0]
+        hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
+        hwp.HAction.Run("TableRightCellAppend")
+        hwp.HAction.Run("TableRightCellAppend")
+        hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
+        hwp.HParameterSet.HInsertText.Text = "생년월일"
+        hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
+        hwp.HAction.Run("TableRightCellAppend")
+        hwp.HAction.Run("TableRightCellAppend")
+        hwp.HAction.Run("TableRightCellAppend")
+        hwp.HAction.Run("TableRightCellAppend")
+        hwp.HAction.Run("TableRightCellAppend")
+        hwp.HAction.Run("TableRightCellAppend")
+        hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
+        hwp.HParameterSet.HInsertText.Text = address[0]
+        hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
+        
+        for i in range(len(deungi) - 1):
+            hwp.HAction.Run("TableLowerCell")
+            hwp.HAction.Run("TableLowerCell")
+            hwp.HAction.Run("TableLowerCell")
+            hwp.HAction.Run("TableLowerCell")
+            hwp.HAction.Run("TableLowerCell")
+            hwp.HAction.Run("TableLowerCell")
+            hwp.HAction.Run("MoveLineEnd")
+            hwp.HAction.Run("MoveRight")
+            hwp.HAction.Run("BreakPage")
+            hwp.HAction.GetDefault("Paste", hwp.HParameterSet.HSelectionOpt.HSet)
+            hwp.HAction.Execute("Paste", hwp.HParameterSet.HSelectionOpt.HSet)
+            hwp.HAction.Run("MoveLineBegin")
+            hwp.HAction.Run("MoveRight")
+            hwp.HAction.Run("TableRightCell")
+            hwp.HAction.Run("TableRightCell")
+            hwp.HAction.Run("TableRightCell")
+            hwp.HAction.Run("TableRightCell")
+            hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
+            hwp.HParameterSet.HInsertText.Text = owner[i+1]
+            hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
+            hwp.HAction.Run("TableRightCellAppend")
+            hwp.HAction.Run("TableRightCellAppend")
+            hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
+            hwp.HParameterSet.HInsertText.Text = "생년월일"
+            hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
+            hwp.HAction.Run("TableRightCellAppend")
+            hwp.HAction.Run("TableRightCellAppend")
+            hwp.HAction.Run("TableRightCellAppend")
+            hwp.HAction.Run("TableRightCellAppend")
+            hwp.HAction.Run("TableRightCellAppend")
+            hwp.HAction.Run("TableRightCellAppend")
+            hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
+            hwp.HParameterSet.HInsertText.Text = address[i+1]
+            hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
+        
+        # hwp.Quit()
+        
+        # 한글양식으로 변환 버튼 클릭
+    def convert_to_hangul_form_3(self):
+        path = os.getcwd()
+        deungi = self.showFile_1(self.fname[0])
+        owner = list(deungi['소유자'])
+        address = list(deungi['주소'])
+        
+        hwp = win32.gencache.EnsureDispatch("HWPFrame.HwpObject")
+        hwp.XHwpWindows.Item(0).Visible = True
+        hwp.Open(path + '/[별지 제4호서식] 정비사업 조합설립추진위원회 구성동의서.hwp')
+        
+        hwp.HAction.Run("MoveTopLevelBegin")
+        hwp.HAction.Run("SelectAll")
+        hwp.HAction.Run("Copy")
+        hwp.HAction.Run("MoveLineBegin")
+        hwp.HAction.Run("MoveRight")
+        hwp.HAction.Run("TableLowerCell")
+        hwp.HAction.Run("TableLowerCell")
+        hwp.HAction.Run("TableLowerCell")
+        hwp.HAction.Run("TableLowerCell")
+        hwp.HAction.Run("TableLowerCell")
+        hwp.HAction.Run("TableRightCell")
+        hwp.HAction.Run("TableRightCell")
+        hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
+        hwp.HParameterSet.HInsertText.Text = owner[0]
+        hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
+        hwp.HAction.Run("TableRightCellAppend")
+        hwp.HAction.Run("TableRightCellAppend")
+        hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
+        hwp.HParameterSet.HInsertText.Text = "생년월일"
+        hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
+        hwp.HAction.Run("TableRightCellAppend")
+        hwp.HAction.Run("TableRightCellAppend")
+        hwp.HAction.Run("TableRightCellAppend")
+        hwp.HAction.Run("TableRightCellAppend")
+        hwp.HAction.Run("TableRightCellAppend")
+        hwp.HAction.Run("TableRightCellAppend")
+        hwp.HAction.Run("TableRightCellAppend")
+        hwp.HAction.Run("TableRightCellAppend")
+        hwp.HAction.Run("TableRightCellAppend")
+        hwp.HAction.Run("TableRightCellAppend")
+        hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
+        hwp.HParameterSet.HInsertText.Text = address[0]
+        hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
+        
+        for i in range(len(deungi) - 1):
+            hwp.HAction.Run("TableUpperCell")
+            hwp.HAction.Run("TableUpperCell")
+            hwp.HAction.Run("TableUpperCell")
+            hwp.HAction.Run("TableUpperCell")
+            hwp.HAction.Run("TableUpperCell")
+            hwp.HAction.Run("TableUpperCell")
+            hwp.HAction.Run("TableUpperCell")
+            hwp.HAction.Run("TableUpperCell")
+            hwp.HAction.Run("MoveLineBegin")
+            hwp.HAction.Run("MoveLeft")
+            hwp.HAction.Run("SelectAll")
+            hwp.HAction.Run("MoveLineEnd")
+            hwp.HAction.Run("BreakPage")
+            hwp.HAction.GetDefault("Paste", hwp.HParameterSet.HSelectionOpt.HSet)
+            hwp.HAction.Execute("Paste", hwp.HParameterSet.HSelectionOpt.HSet)
+            hwp.HAction.Run("MoveSelViewUp")
+            hwp.HAction.Run("MoveLineBegin")
+            hwp.HAction.Run("MoveRight")
+            hwp.HAction.Run("TableLowerCell")
+            hwp.HAction.Run("TableLowerCell")
+            hwp.HAction.Run("TableLowerCell")
+            hwp.HAction.Run("TableLowerCell")
+            hwp.HAction.Run("TableLowerCell")
+            hwp.HAction.Run("TableRightCell")
+            hwp.HAction.Run("TableRightCell")
+            hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
+            hwp.HParameterSet.HInsertText.Text = owner[i+1]
+            hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
+            hwp.HAction.Run("TableRightCellAppend")
+            hwp.HAction.Run("TableRightCellAppend")
+            hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
+            hwp.HParameterSet.HInsertText.Text = "생년월일"
+            hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
+            hwp.HAction.Run("TableRightCellAppend")
+            hwp.HAction.Run("TableRightCellAppend")
+            hwp.HAction.Run("TableRightCellAppend")
+            hwp.HAction.Run("TableRightCellAppend")
+            hwp.HAction.Run("TableRightCellAppend")
+            hwp.HAction.Run("TableRightCellAppend")
+            hwp.HAction.Run("TableRightCellAppend")
+            hwp.HAction.Run("TableRightCellAppend")
+            hwp.HAction.Run("TableRightCellAppend")
+            hwp.HAction.Run("TableRightCellAppend")
+            hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
+            hwp.HParameterSet.HInsertText.Text = address[i+1]
+            hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
+        
+        # hwp.Quit()
+        
+        # 한글양식으로 변환 버튼 클릭
+    def convert_to_hangul_form_4(self):
+        path = os.getcwd()
+        deungi = self.showFile_1(self.fname[0])
+        owner = list(deungi['소유자'])
+        address = list(deungi['주소'])
+        
+        hwp = win32.gencache.EnsureDispatch("HWPFrame.HwpObject")
+        hwp.XHwpWindows.Item(0).Visible = True
+        hwp.Open(path + '/[별지 제6호서식] 조합설립 동의서(재개발사업¸ 재건축사업).hwp')
+        
+        hwp.HAction.Run("MoveTopLevelBegin")
+        hwp.HAction.Run("SelectAll")
+        hwp.HAction.Run("Copy")
+        hwp.HAction.Run("MoveLineBegin")
+        hwp.HAction.Run("MoveRight")
+        hwp.HAction.Run("TableLowerCell")
+        hwp.HAction.Run("TableLowerCell")
+        hwp.HAction.Run("TableLowerCell")
+        hwp.HAction.Run("TableLowerCell")
+        hwp.HAction.Run("TableLowerCell")
+        hwp.HAction.Run("TableRightCell")
+        hwp.HAction.Run("TableRightCell")
+        hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
+        hwp.HParameterSet.HInsertText.Text = owner[0]
+        hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
+        hwp.HAction.Run("TableRightCellAppend")
+        hwp.HAction.Run("TableRightCellAppend")
+        hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
+        hwp.HParameterSet.HInsertText.Text = "생년월일"
+        hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
+        
+        for i in range(len(deungi) - 1):
+            hwp.HAction.Run("TableUpperCell")
+            hwp.HAction.Run("TableUpperCell")
+            hwp.HAction.Run("TableUpperCell")
+            hwp.HAction.Run("TableUpperCell")
+            hwp.HAction.Run("TableUpperCell")
+            hwp.HAction.Run("TableLeftCell")
+            hwp.HAction.Run("MoveLineBegin")
+            hwp.HAction.Run("MoveLeft")
+            hwp.HAction.Run("SelectAll")
+            hwp.HAction.Run("MoveLineEnd")
+            hwp.HAction.Run("BreakPage")
+            hwp.HAction.GetDefault("Paste", hwp.HParameterSet.HSelectionOpt.HSet)
+            hwp.HAction.Execute("Paste", hwp.HParameterSet.HSelectionOpt.HSet)
+            hwp.HAction.Run("MovePrevParaBegin")
+            hwp.HAction.Run("MovePrevParaBegin")
+            hwp.HAction.Run("MovePrevParaBegin")
+            hwp.HAction.Run("MoveRight")
+            hwp.HAction.Run("TableLowerCell")
+            hwp.HAction.Run("TableLowerCell")
+            hwp.HAction.Run("TableLowerCell")
+            hwp.HAction.Run("TableLowerCell")
+            hwp.HAction.Run("TableLowerCell")
+            hwp.HAction.Run("TableRightCell")
+            hwp.HAction.Run("TableRightCell")
+            hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
+            hwp.HParameterSet.HInsertText.Text = owner[i+1]
+            hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
+            hwp.HAction.Run("TableRightCellAppend")
+            hwp.HAction.Run("TableRightCellAppend")
+            hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
+            hwp.HParameterSet.HInsertText.Text = "생년월일"
+            hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
+            
+        # hwp.Quit()
         
 if __name__ == '__main__':
     app = QApplication(sys.argv)
