@@ -111,12 +111,12 @@ class MyApp(QWidget):
                 if self.form_name == '' or self.form_name[0] == '':
                     return False
                 elif self.form_name[0].split('.')[1] != 'hwp':
-                    reply = QMessageBox.question(self, 'Message', '잘못된 형식의 파일입니다.', QMessageBox.Yes)
+                    reply = QMessageBox.question(self, 'Message', '잘못된 형식의 양식 파일입니다.', QMessageBox.Yes)
                     self.form_name = ''
                 else:
                     return True
         elif self.form_name[0].split('.')[1] != 'hwp':
-            reply = QMessageBox.question(self, 'Message', '잘못된 형식의 파일입니다.', QMessageBox.Yes)
+            reply = QMessageBox.question(self, 'Message', '잘못된 형식의 양식 파일입니다.', QMessageBox.Yes)
             self.form_name = ''
             return False
         else:
@@ -151,7 +151,7 @@ class MyApp(QWidget):
                 try :
                     host = line[text_ind+1]
                     birth = line[text_ind+2]
-                    birth = birth[0:2]
+                    birth = birth[0:6]
                     return host, birth
                 except :
                     host = line[text_ind+1]
@@ -163,7 +163,7 @@ class MyApp(QWidget):
         
         host = line[-2]
         birth = line[-1]
-        birth = birth[0:2]
+        birth = birth[0:6]
         return host + ' ' +birth
     
     
@@ -593,7 +593,7 @@ class MyApp(QWidget):
                 hwp.HAction.Run("TableRightCellAppend")
                 hwp.HAction.Run("TableRightCellAppend")
                 hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
-                hwp.HParameterSet.HInsertText.Text = "생년월일"
+                hwp.HParameterSet.HInsertText.Text = owner[0].split()[1]
                 hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
                 hwp.HAction.Run("TableRightCellAppend")
                 hwp.HAction.Run("TableRightCellAppend")
@@ -623,7 +623,7 @@ class MyApp(QWidget):
                     hwp.HAction.Run("TableRightCellAppend")
                     hwp.HAction.Run("TableRightCellAppend")
                     hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
-                    hwp.HParameterSet.HInsertText.Text = "생년월일"
+                    hwp.HParameterSet.HInsertText.Text = owner[i+1].split()[1]
                     hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
                     hwp.HAction.Run("TableRightCellAppend")
                     hwp.HAction.Run("TableRightCellAppend")
@@ -665,7 +665,7 @@ class MyApp(QWidget):
                 hwp.HAction.Run("TableRightCellAppend")
                 hwp.HAction.Run("TableRightCellAppend")
                 hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
-                hwp.HParameterSet.HInsertText.Text = "생년월일"
+                hwp.HParameterSet.HInsertText.Text = owner[0].split()[1]
                 hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
                 hwp.HAction.Run("TableRightCellAppend")
                 hwp.HAction.Run("TableRightCellAppend")
@@ -701,7 +701,7 @@ class MyApp(QWidget):
                     hwp.HAction.Run("TableRightCellAppend")
                     hwp.HAction.Run("TableRightCellAppend")
                     hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
-                    hwp.HParameterSet.HInsertText.Text = "생년월일"
+                    hwp.HParameterSet.HInsertText.Text = owner[i+1].split()[1]
                     hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
                     hwp.HAction.Run("TableRightCellAppend")
                     hwp.HAction.Run("TableRightCellAppend")
@@ -750,7 +750,7 @@ class MyApp(QWidget):
                 hwp.HAction.Run("TableRightCellAppend")
                 hwp.HAction.Run("TableRightCellAppend")
                 hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
-                hwp.HParameterSet.HInsertText.Text = "생년월일"
+                hwp.HParameterSet.HInsertText.Text = owner[0].split()[1]
                 hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
                 hwp.HAction.Run("TableRightCellAppend")
                 hwp.HAction.Run("TableRightCellAppend")
@@ -798,7 +798,7 @@ class MyApp(QWidget):
                     hwp.HAction.Run("TableRightCellAppend")
                     hwp.HAction.Run("TableRightCellAppend")
                     hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
-                    hwp.HParameterSet.HInsertText.Text = "생년월일"
+                    hwp.HParameterSet.HInsertText.Text = owner[i+1].split()[1]
                     hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
                     hwp.HAction.Run("TableRightCellAppend")
                     hwp.HAction.Run("TableRightCellAppend")
@@ -851,7 +851,7 @@ class MyApp(QWidget):
                 hwp.HAction.Run("TableRightCellAppend")
                 hwp.HAction.Run("TableRightCellAppend")
                 hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
-                hwp.HParameterSet.HInsertText.Text = "생년월일"
+                hwp.HParameterSet.HInsertText.Text = owner[0].split()[1]
                 hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
             
                 for i in range(len(deungi) - 1):
@@ -885,7 +885,7 @@ class MyApp(QWidget):
                     hwp.HAction.Run("TableRightCellAppend")
                     hwp.HAction.Run("TableRightCellAppend")
                     hwp.HAction.GetDefault("InsertText", hwp.HParameterSet.HInsertText.HSet)
-                    hwp.HParameterSet.HInsertText.Text = "생년월일"
+                    hwp.HParameterSet.HInsertText.Text = owner[i+1].split()[1]
                     hwp.HAction.Execute("InsertText", hwp.HParameterSet.HInsertText.HSet)
                 
                     # hwp.Quit()
