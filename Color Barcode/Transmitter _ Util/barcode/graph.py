@@ -233,7 +233,7 @@ def GetPixelGraph(img, x_start, x_end, frame_type):
     # print(R, R_prime, G, G_prime, B, B_prime)
     
     # R, G, B graph
-    '''
+
     plt.subplot(411), plt.imshow(img)
     plt.subplot(412), plt.plot(r_mean, color='r'), plt.title(
         str(r_mean[r_max]) + ' ' + str(r_max) + ' ' + str(r_mean[r_min]) + ' ' + str(r_min))
@@ -258,7 +258,7 @@ def GetPixelGraph(img, x_start, x_end, frame_type):
     plt.plot(b_mean_filtered)
     plt.tight_layout()
     plt.show()
-    '''
+
 
     rgb_max = [r_max, g_max, b_max]
     rgb_min = [r_min, g_min, b_min]

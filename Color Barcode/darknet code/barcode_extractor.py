@@ -16,6 +16,10 @@ import matplotlib.pyplot as plt
 from enum import Enum
 import barcode as bc
 
+'''
+python3 barcode_extractor.py --input test_1.mp4 --weights barcode/backup/yolov4-custom_best.weights --config_file barcode/yolov4-custom.cfg --data_file barcode/barcode.data
+'''
+
 # 3bit
 class ColorSet(Enum):
     C000 = [255,0,0]
@@ -158,7 +162,10 @@ def drawing(frame_queue, detections_queue, fps_queue):
     rx_data_list5 = list()
 
     num_frame = 0
-    sync = 0
+    sync = False
+    
+    pattern_1 = 0
+    pattern_2 = 0
 
     ber = list()
     ber2 = list()
@@ -205,47 +212,50 @@ def drawing(frame_queue, detections_queue, fps_queue):
                 
                 idx += 1
                 
-            rgb_start, rgb_end, rgb_max, rgb_min, rgb_pilot, pos = bc.GetPixelGraph(barcode, 0, 349, 0)
-            if sync == 0:
-                if rgb_pilot == [1, 1, 0, 0, 0, 0]:
-                    sync += 1
+            rgb_start, rgb_end, rgb_max, rgb_min, rgb_pilot_1, rgb_pilot_2, pos = bc.GetPixelGraph(barcode, 0, 350, 0)
+            
+            # RR`GG`BB` 인 경우 
+            if pattern_1 == 0:
+                if rgb_pilot_1 == [1, 1, 0, 0, 0, 0]:
+                    pattern_1 += 1
                     r_pos = pos[0]
-                    r, g, b, c, m, y= bc.GetColor(barcode, 0, 349, rgb_start, rgb_end, pos)
+                    r, g, b, c, m, y= bc.GetColor(barcode, 0, 350, rgb_start, rgb_end, pos)
                     rgb_channel_matrix[0] = [r, g, b]
                     cmy_channel_matrix[0] = [c, m, y]
-            elif sync == 1:
-                if rgb_pilot == [0, 0, 1, 1, 0, 0]:
-                    sync += 1
+            elif pattern_1 == 1:
+                if rgb_pilot_1 == [0, 0, 1, 1, 0, 0]:
+                    pattern_1 += 1
                     g_pos = pos[1]
-                    r, g, b, c, m, y= bc.GetColor(barcode, 0, 349, rgb_start, rgb_end, pos)
+                    r, g, b, c, m, y= bc.GetColor(barcode, 0, 350, rgb_start, rgb_end, pos)
                     rgb_channel_matrix[1] = [r, g, b]
                     cmy_channel_matrix[1] = [c, m, y]
                 else:
-                    sync = 0
-                    r_pos = 0
-                    g_pos	 = 0
-                    b_pos = 0
-                    rgb_channel_matrix = [[0,0,0], [0,0,0], [0,0,0]]
-                    cmy_channel_matrix = [[0,0,0], [0,0,0], [0,0,0]]
-            elif sync == 2:
-                if rgb_pilot == [0, 0, 0, 0, 1, 1]:
-                    sync += 1
-                    b_pos = pos[2]
-                    r, g, b, c, m, y= bc.GetColor(barcode, 0, 349, rgb_start, rgb_end, pos)
-                    rgb_channel_matrix[2] = [r, g, b]
-                    cmy_channel_matrix[2] = [c, m, y]
-                    print("sync")
-            
-                else:
-                    sync = 0
+                    pattern_1 = 0
                     r_pos = 0
                     g_pos = 0
                     b_pos = 0
                     rgb_channel_matrix = [[0,0,0], [0,0,0], [0,0,0]]
                     cmy_channel_matrix = [[0,0,0], [0,0,0], [0,0,0]]
-            elif sync == 3:
+            elif pattern_1 == 2:
+                if rgb_pilot_1 == [0, 0, 0, 0, 1, 1]:
+                    pattern_1 += 1
+                    b_pos = pos[2]
+                    r, g, b, c, m, y= bc.GetColor(barcode, 0, 350, rgb_start, rgb_end, pos)
+                    rgb_channel_matrix[2] = [r, g, b]
+                    cmy_channel_matrix[2] = [c, m, y]
+                    if pattern_1 == 3:
+                        print("sync")
+                        sync = True
+                else:
+                    pattern_1 = 0
+                    r_pos = 0
+                    g_pos = 0
+                    b_pos = 0
+                    rgb_channel_matrix = [[0,0,0], [0,0,0], [0,0,0]]
+                    cmy_channel_matrix = [[0,0,0], [0,0,0], [0,0,0]]
+            elif pattern_1 == 3:
                 rgb_pos = [r_pos, g_pos, b_pos]
-                r, g, b, c, m, y = bc.GetColor(barcode, 0, 349, rgb_start, rgb_end, pos)
+                r, g, b, c, m, y = bc.GetColor(barcode, 0, 350, rgb_start, rgb_end, rgb_pos)
                 rx_color = bc.estimating(r, g, b, rgb_channel_matrix)
                 rx_data = bc.decoding(rx_color)
                 rx_data_list.append(rx_data)
@@ -260,6 +270,10 @@ def drawing(frame_queue, detections_queue, fps_queue):
         
                 rx_color4 = bc.estimating(r, g, b, cmy_channel_matrix)
                 rx_data4 = bc.decoding(rx_color4)
+                if rx_data4 >= 4:
+                    rx_data4 -= 4
+                else:
+                    rx_data4 += 4
                 rx_data_list4.append(rx_data4)
         
                 rx_data5 = bc.decoding2(rx_color, rx_color2)
@@ -269,8 +283,90 @@ def drawing(frame_queue, detections_queue, fps_queue):
         
                 num_frame += 1
         
+                
+                    
+            # XRR`GG`BB`X 인 경우
+            if pattern_2 == 0:
+                if rgb_pilot_2 == [1, 0, 0, 0, 0, 0]:
+                    pattern_2 += 1
+                    x_r, x_g, x_b, r, g, b= bc.GetColor(barcode, 0, 350, rgb_start, rgb_end, pos)
+                    rgb_channel_matrix[0] = [r, g, b]
+            elif rgb_pilot_2 == 1:
+                if rgb_pilot_2 == [0, 1, 1, 0, 0, 0]:
+                    pattern_2 += 1
+                    c, m, y, r, g, b = bc.GetColor(barcode, 0, 350, rgb_start, rgb_end, pos)                    
+                    cmy_channel_matrix[0] = [c, m, y]
+                    rgb_channel_matrix[1] = [r, g, b]
+                else:
+                    pattern_2 = 0
+                    r_pos = 0
+                    g_pos = 0
+                    b_pos = 0
+                    rgb_channel_matrix = [[0,0,0], [0,0,0], [0,0,0]]
+                    cmy_channel_matrix = [[0,0,0], [0,0,0], [0,0,0]]
+            elif rgb_pilot_2 == 2:
+                if rgb_pilot_2 == [0, 0, 0, 1, 1, 0]:
+                    pattern_2 += 1
+                    c, m, y, r, g, b = bc.GetColor(barcode, 0, 350, rgb_start, rgb_end, pos)
+                    cmy_channel_matrix[1] = [c, m, y]
+                    rgb_channel_matrix[2] = [r, g, b]
+                else:
+                    pattern_2 = 0
+                    r_pos = 0
+                    g_pos = 0
+                    b_pos = 0
+                    rgb_channel_matrix = [[0,0,0], [0,0,0], [0,0,0]]
+                    cmy_channel_matrix = [[0,0,0], [0,0,0], [0,0,0]]
+            elif rgb_pilot_2 == 3:
+                if rgb_pilot_2 == [0, 0, 0, 0, 0, 1]:
+                    pattern_2 += 1
+                    c, m, y, r, g, b = bc.GetColor(barcode, 0, 350, rgb_start, rgb_end, pos)
+                    cmy_channel_matrix[2] = [c, m, y]
+                    
+                    rx_color = bc.estimating(r, g, b, rgb_channel_matrix)
+                    rx_data = bc.decoding(rx_color)
+                    rx_data_list.append(rx_data)
+                    print('sync2')
+                else:
+                    pattern_2 = 0
+                    r_pos = 0
+                    g_pos = 0
+                    b_pos = 0
+                    rgb_channel_matrix = [[0,0,0], [0,0,0], [0,0,0]]
+                    cmy_channel_matrix = [[0,0,0], [0,0,0], [0,0,0]]
+            elif rgb_pilot_2 == 4:
+                c, m, y, r, g, b = bc.GetColor(barcode, 0, 350, rgb_start, rgb_end, pos)
+                
+                rx_color = bc.estimating(r, g, b, rgb_channel_matrix)
+                rx_data = bc.decoding(rx_color)
+                rx_data_list.append(rx_data)
+        
+                rx_color2 = bc.estimating(c, m, y, cmy_channel_matrix)
+                rx_data2 = bc.decoding(rx_color2)
+                rx_data_list2.append(rx_data2)
+        
+                rx_color3 = (pre_color + rx_color2)/2
+                rx_data3 = bc.decoding(rx_color3)
+                rx_data_list3.append(rx_data3)
+        
+                rx_color4 = bc.estimating(r, g, b, cmy_channel_matrix)
+                rx_data4 = bc.decoding(rx_color4)
+                if rx_data4 >= 4:
+                    rx_data4 -= 4
+                else:
+                    rx_data4 += 4
+                rx_data_list4.append(rx_data4)
+        
+                rx_data5 = bc.decoding2(pre_color, rx_color2)
+                rx_data_list5.append(rx_data5)
+                
+                pre_color = rx_color
+                
+                num_frame += 1
+        
             if num_frame == 27:
-                sync = 0
+                pattern_1 = 0
+                pattern_2 = 0
                 num_frame = 0
                 r_pos = 0
                 g_pos = 0
@@ -288,8 +384,14 @@ def drawing(frame_queue, detections_queue, fps_queue):
                 rx_data_list3 = list()
                 rx_data_list4 = list()
                 rx_data_list5 = list()
-                print('sync out')  
-                
+                print('sync out')
+                    
+                if pattern_2 == 0:
+                    if rgb_pilot_2 == [1, 0, 0, 0, 0, 0]:
+                        pattern_2 += 1
+                        x_r, x_g, x_b, r, g, b= bc.GetColor(barcode, 0, 350, rgb_start, rgb_end, pos)
+                        rgb_channel_matrix[0] = [r, g, b]
+                    
             if cv2.waitKey(fps) == 27:
                 print('finish1')
                 break
