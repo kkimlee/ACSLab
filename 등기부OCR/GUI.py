@@ -503,6 +503,15 @@ class MyApp(QWidget):
     def convert_to_excel(self):
         if self.checkDataFile():
             deungi = self.showFile_1(self.fname[0])
+            for i in range(len(deungi)):
+                temp = deungi['소유자'][i].split()
+                deungi['소유자'][i] = ''
+                for j in range(len(temp)):
+                    if j % 2 == 0:
+                        deungi['소유자'][i] += temp[j]
+                    else:
+                        deungi['소유자'][i] += ' ' + temp[j][:2] + ' '
+                        
             self.makeexcel(deungi)
         
     # 한글로 변환 버튼 클릭
@@ -561,8 +570,7 @@ class MyApp(QWidget):
     # 한글양식으로 변환 버튼 클릭
     def convert_to_hangul_form_1(self):
         if self.checkDataFile():
-            self.form_name = QFileDialog.getOpenFileName(self)
-            print('양식 파일 선')
+            # self.form_name = QFileDialog.getOpenFileName(self)
             
             if self.checkFormFile():
                 path = os.getcwd()
@@ -637,7 +645,7 @@ class MyApp(QWidget):
         # 한글양식으로 변환 버튼 클릭
     def convert_to_hangul_form_2(self):
         if self.checkDataFile():
-            self.form_name = QFileDialog.getOpenFileName(self)
+            # self.form_name = QFileDialog.getOpenFileName(self)
             
             if self.checkFormFile():
                 path = os.getcwd()
@@ -719,7 +727,7 @@ class MyApp(QWidget):
     # 한글양식으로 변환 버튼 클릭
     def convert_to_hangul_form_3(self):
         if self.checkDataFile():
-            self.form_name = QFileDialog.getOpenFileName(self)
+            # self.form_name = QFileDialog.getOpenFileName(self)
             
             if self.checkFormFile():
                 path = os.getcwd()
@@ -820,7 +828,7 @@ class MyApp(QWidget):
     # 한글양식으로 변환 버튼 클릭
     def convert_to_hangul_form_4(self):
         if self.checkDataFile():
-            self.form_name = QFileDialog.getOpenFileName(self)
+            # self.form_name = QFileDialog.getOpenFileName(self)
             
             if checkFormFile():
                 path = os.getcwd()
