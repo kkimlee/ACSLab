@@ -5,9 +5,9 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from tensorflow.keras.models import Model
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.layers import Dense, Conv1D, Conv2D, MaxPooling1D, MaxPooling2D, Input, Flatten, concatenate
+# from tensorflow.keras.models import Model
+# from tensorflow.keras.optimizers import Adam
+# from tensorflow.keras.layers import Dense, Conv1D, Conv2D, MaxPooling1D, MaxPooling2D, Input, Flatten, concatenate
 
 
 def search(dirname, extension):
@@ -47,8 +47,8 @@ for file in file_list:
         os.makedirs(test_path + name)
         
     for i in range(120):
-        train_df = random_batch_sample(df, 1000)
-        test_df = random_batch_sample(df, 1000)
+        train_df = random_batch_sample(df, 100)
+        test_df = random_batch_sample(df, 100)
         
         if i < 10:
             label = '00' + str(i)
