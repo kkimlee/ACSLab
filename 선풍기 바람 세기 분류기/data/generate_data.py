@@ -47,8 +47,8 @@ for file in file_list:
         os.makedirs(test_path + name)
         
     for i in range(120):
-        train_df = random_batch_sample(df, 100)
-        test_df = random_batch_sample(df, 100)
+        train_df = random_batch_sample(df, 10)
+        test_df = random_batch_sample(df, 10)
         
         if i < 10:
             label = '00' + str(i)
