@@ -63,7 +63,7 @@ def generate_data(data, label, data_file_list):
 
 def create_model():
     model = Sequential()
-    model.add(Conv2D(6, (3, 3), activation='relu', padding='same', input_shape=(1000, 9, 1)))
+    model.add(Conv2D(6, (3, 3), activation='relu', padding='same', input_shape=(10, 9, 1)))
     model.add(MaxPooling2D((2,2)))
     model.add(Conv2D(12, (3, 3), activation='relu', padding='same'))
     model.add(MaxPooling2D((2, 2)))
@@ -99,7 +99,7 @@ motor_model.compile(optimizer=Adam(lr=0.0005),
               loss='categorical_crossentropy',
               metrics=['accuracy'])
 
-motor_model.fit(x=train_motor_data, y=train_motor_data_label, batch_size=10, epochs=20)
+motor_model.fit(x=train_motor_data, y=train_motor_data_label, batch_size=10, epochs=100)
 motor_model_pred = motor_model.predict(test_motor_data)
 motor_model_test_loss, motor_model_test_acc = motor_model.evaluate(test_motor_data, test_motor_data_label, verbose=1)
 
@@ -111,7 +111,7 @@ cover_model.compile(optimizer=Adam(lr=0.0005),
               loss='categorical_crossentropy',
               metrics=['accuracy'])
 
-cover_model.fit(x=train_cover_data, y=train_cover_data_label, batch_size=10, epochs=20)
+cover_model.fit(x=train_cover_data, y=train_cover_data_label, batch_size=10, epochs=100)
 cover_modelpred = cover_model.predict(test_cover_data)
 cover_model_test_loss, cover_model_test_acc = cover_model.evaluate(test_cover_data, test_cover_data_label, verbose=1)
 
