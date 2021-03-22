@@ -1,0 +1,132 @@
+import os
+import pywt
+import scipy
+import numpy as np
+import pandas as pd
+import cv2
+import matplotlib.pyplot as plt
+from scipy import signal
+from sklearn.preprocessing import MinMaxScaler
+
+def search(dirname, extension):
+    file_list = []
+    filenames = os.listdir(dirname)
+    for filename in filenames:
+        full_filename = os.path.join(dirname, filename)
+        ext = os.path.splitext(full_filename)[-1]
+        if ext == extension:
+            file_list.append(full_filename)
+            print(full_filename)
+
+    return file_list
+
+
+def random_batch_sample(data, batch):
+    rand_n = np.random.randint(0, len(data))
+    print(rand_n)
+    while (rand_n > len(data) - batch):
+        rand_n = np.random.randint(0, len(data))
+    print(rand_n)
+    return data[rand_n:rand_n + batch]
+
+
+def generate_sample_data(data_list):
+
+    for data_file in data_list:
+        label = data_file[2:-6]
+        sample_data = label + '.csv'
+        pd.set_option('precision', 20)
+        if os.path.isfile(sample_data):
+            sample_dataset = pd.read_csv(sample_data, float_precision='high')
+        else:
+            sample_dataset = pd.DataFrame()
+
+        data = pd.read_csv(data_file, float_precision='high')
+        # data = data * 1000
+        print(data_file)
+        sample_dataset = random_batch_sample(data, 1024)
+
+        plt.plot(sample_dataset['Drive_End'], label='Drive_End')
+        plt.show()
+        
+        coef, freqs = pywt.cwt(sample_dataset['Drive_End'], np.arange(1, 1025), 'morl')
+        coef = np.interp(coef, (coef.min(), coef.max()), (0, 255))
+        print(coef.shape)
+        ret, thresh1 = cv2.threshold(coef,0,255, cv2.THRESH_BINARY)
+        print(thresh1)
+        # 
+        
+        plt.matshow(thresh1, cmap='gray')
+        plt.show()
+    
+        '''
+        plt.matshow(coef, cmap='gray')
+        plt.colorbar(label='color')
+        plt.show()
+        '''
+        
+        coef = cv2.resize(coef, dsize=(32, 32), interpolation=cv2.INTER_CUBIC)
+        plt.matshow(coef, cmap='gray')
+        plt.show()
+        
+
+
+
+data_list = search('./', '.csv')
+
+data = pd.read_csv(data_list[0], float_precision='high')
+sample_dataset = random_batch_sample(data, 1024)
+
+plt.plot(sample_dataset['Drive_End'], label='Drive_End')
+plt.show()
+
+# coef = signal.cwt(sample_dataset['Drive_End'], signal.morlet, np.arange(1, 1025))
+coef, freqs = pywt.cwt(sample_dataset['Drive_End'], np.arange(1, 1025), 'morl')
+# coef = np.interp(coef, (coef.min(), coef.max()), (0, 255))
+
+
+
+# ret, coef= cv2.threshold(coef, 0, coef.max(), cv2.THRESH_TRUNC)
+coef = np.where(coef>0, coef, 0)
+coef2 = coef
+
+
+
+# ret, coef = cv2.threshold(coef, coef.max()+coef.min(), coef.max(), cv2.THRESH_TRUNC)
+# ret, thresh = cv2.threshold(thresh)
+
+plt.matshow(coef, cmap='gray')
+plt.show()
+
+img = scipy.misc.imresize(coef, (32, 32), interp='bicubic')
+
+plt.matshow(img, cmap='gray')
+plt.show()
+'''
+coef = cv2.resize(coef, dsize=(512, 512), interpolation=cv2.INTER_CUBIC)
+plt.matshow(coef, cmap='gray')
+plt.show()
+
+coef = cv2.resize(coef, dsize=(256, 256), interpolation=cv2.INTER_CUBIC)
+plt.matshow(coef, cmap='gray')
+plt.show()
+
+coef = cv2.resize(coef, dsize=(128, 128), interpolation=cv2.INTER_CUBIC)
+plt.matshow(coef, cmap='gray')
+plt.show()
+
+coef = cv2.resize(coef, dsize=(64, 64), interpolation=cv2.INTER_CUBIC)
+plt.matshow(coef, cmap='gray')
+plt.show()
+'''
+coef = cv2.resize(coef, dsize=(32, 32), interpolation=cv2.INTER_CUBIC)
+plt.matshow(coef, cmap='gray')
+plt.show()
+
+# generate_sample_data(data_list)
+'''
+img = scipy.misc.imresize(coef, (32, 32), interp='bicubic')
+
+plt.matshow(img, cmap='gray')
+plt.show()
+'''
