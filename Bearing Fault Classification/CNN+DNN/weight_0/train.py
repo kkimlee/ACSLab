@@ -1,5 +1,5 @@
 import os
-import cv2
+# import cv2
 import csv
 import numpy as np
 import pandas as pd
@@ -47,13 +47,13 @@ test_img_feature = []
 
 train_raw_feature = []
 test_raw_feature = []
-
+'''
 for train_img_path in train_data['img_path']:
     train_img_feature.append(cv2.imread(train_img_path))
     
 for test_img_path in test_data['img_path']:
     test_img_feature.append(cv2.imread(test_img_path))
-
+'''
 for train_raw_path in train_data['raw_path']:
     train_raw_feature.append(pd.read_csv(train_raw_path)['Drive_End'])
 
@@ -62,8 +62,8 @@ for test_raw_path in test_data['raw_path']:
 
 train_value_feature = np.array(train_value_feature)
 tset_value_feature = np.array(test_value_feature)
-train_img_feature =  np.array(train_img_feature)[:, :, :, 0].astype(np.float32)
-test_img_feature =  np.array(test_img_feature)[:, :, :, 0].astype(np.float32)
+# train_img_feature =  np.array(train_img_feature)[:, :, :, 0].astype(np.float32)
+# test_img_feature =  np.array(test_img_feature)[:, :, :, 0].astype(np.float32)
 train_raw_feature = np.array(train_raw_feature)[:,:]
 test_raw_feature = np.array(test_raw_feature)[:,:]
 
@@ -71,7 +71,7 @@ train_raw_feature = np.reshape(train_raw_feature, train_raw_feature.shape+(1,))
 test_raw_feature = np.reshape(test_raw_feature, test_raw_feature.shape+(1,))
 
 
-image_input_shape = train_img_feature[0].shape
+# image_input_shape = train_img_feature[0].shape
 value_input_shape = train_value_feature[0].shape
 raw_input_shape = train_raw_feature[0].shape
 

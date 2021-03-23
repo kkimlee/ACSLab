@@ -28,7 +28,7 @@ def generate_sample_data(data_list):
     for data_file in data_list:
         label = data_file[6:-4]
         sample_data = label + '.csv'
-    
+        path = './AutoEncoder+Clustering/csv/'
         if os.path.isfile(sample_data):
             sample_dataset = pd.read_csv(sample_data)
         else:
@@ -37,8 +37,11 @@ def generate_sample_data(data_list):
         data = pd.read_csv(data_file)
         print(label)
         
-        for i in range(237):
-            sample_dataset = random_batch_sample(data, 512)
+        if not os.path.exists(path+label):
+            os.makedirs(path+label)
+        
+        for i in range(101):
+            sample_dataset = random_batch_sample(data, 1024)
             
             if(i < 10):
                 number = '_00' + str(i)
@@ -49,7 +52,7 @@ def generate_sample_data(data_list):
                 
             file_name = label + number + '.csv'
             # coef, freqs = pywt.cwt(sample_dataset['Drive_End'], np.arange(1, 1025), 'morl')
-            sample_dataset.to_csv('./raw_data/' + file_name, header=True, index=False)
+            sample_dataset.to_csv(path + label + '/' + file_name, header=True, index=False)
         
 data_list = search('./csv', '.csv')
 generate_sample_data(data_list)
