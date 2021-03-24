@@ -56,7 +56,6 @@ for test_image in test_images:
         
 
 x_train = np.array(x_train)[:, :, :, 0].astype(np.float32)
-print(x)
 x_test = np.array(x_test)[:, :, :, 0].astype(np.float32)
 x_train = np.reshape(x_train, x_train.shape+(1,))
 x_test = np.reshape(x_test, x_test.shape+(1,))
