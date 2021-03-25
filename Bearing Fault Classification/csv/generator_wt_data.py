@@ -43,21 +43,21 @@ def generate_sample_data(data_list):
         for i in range(50, 100):
             sample_dataset = random_batch_sample(data, 1024)
 
-            coef, freqs = pywt.cwt(sample_dataset['Drive_End'], np.arange(1, 1025), 'morl')
+            # coef, freqs = pywt.cwt(sample_dataset['Drive_End'], np.arange(1, 1025), 'morl')
             
-            coef = np.where(coef > 0, coef, 0)
-            coef = scipy.misc.imresize(coef, (32, 32), interp='bicubic')
+            # coef = np.where(coef > 0, coef, 0)
+            # coef = scipy.misc.imresize(coef, (32, 32), interp='bicubic')
             
-            '''
-            coef = cv2.resize(coef, dsize=(512, 512), interpolation=cv2.INTER_CUBIC)
-            coef = cv2.resize(coef, dsize=(256, 256), interpolation=cv2.INTER_CUBIC)
-            coef = cv2.resize(coef, dsize=(128, 128), interpolation=cv2.INTER_CUBIC)
-            coef = cv2.resize(coef, dsize=(64, 64), interpolation=cv2.INTER_CUBIC)
-            coef = cv2.resize(coef, dsize=(32,32), interpolation=cv2.INTER_CUBIC)
-            '''
             
-            plt.matshow(coef, cmap='gray')
-            plt.imsave('../wt_train/' + data_file[2:-4] +'_' + str(i) + '.png', coef, cmap='gray')
+            # coef = cv2.resize(coef, dsize=(512, 512), interpolation=cv2.INTER_CUBIC)
+            # coef = cv2.resize(coef, dsize=(256, 256), interpolation=cv2.INTER_CUBIC)
+            # coef = cv2.resize(coef, dsize=(128, 128), interpolation=cv2.INTER_CUBIC)
+            # coef = cv2.resize(coef, dsize=(64, 64), interpolation=cv2.INTER_CUBIC)
+            # coef = cv2.resize(coef, dsize=(32,32), interpolation=cv2.INTER_CUBIC)
+            
+            # plt.plot(sample_dataset['Drive_End'])
+            # plt.matshow(coef, cmap='gray')
+            # plt.imsave('../wt_train/' + data_file[2:-4] +'_' + str(i) + '.png', coef, cmap='gray')
             plt.show()
             
 data_list = search('./', '.csv')
