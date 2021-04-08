@@ -8,6 +8,8 @@ import os
 import pandas as pd
 from pandas import DataFrame
 
+from scipy.stats import norm
+
 class data_analysis:
     def __init__(self):
         self.feedrate = 960
@@ -68,34 +70,46 @@ class data_analysis:
         return target_data
     
     def preprocess(self, df, feedrate):
-        '''
+        
+        print(str(feedrate) + '데이터의 결측치 확인')
+        print(df.describe())
+        
         print(str(feedrate) + '축1spindleLoad 데이터')
         print(df['축1spindleLoad'].describe())
         plt.title(str(feedrate) + 'axis 1 spindleLoad histogram')
         plt.hist(df['축1spindleLoad'])
+        plt.xlabel('value')
+        plt.ylabel('count')
         plt.show()
         plt.title(str(feedrate) + 'axis 1 spindleLoad boxplot')
         plt.boxplot(df['축1spindleLoad'])
+        plt.ylabel('value')
         plt.show()
     
         print(str(feedrate) + '축1 spindleSpeed 데이터')
         print(df['축1 spindleSpeed'].describe())
         plt.title(str(feedrate) + 'axis 1 spindleSpeed histogram')
         plt.hist(df['축1 spindleSpeed'])
+        plt.xlabel('value')
+        plt.ylabel('count')
         plt.show()
         plt.title(str(feedrate) + 'axis 1 spindleSpeed boxplot')
         plt.boxplot(df['축1 spindleSpeed'])
+        plt.ylabel('value')
         plt.show()
     
         print(str(feedrate) + 'Feed')
         print(df['Feed'].describe())
         plt.title(str(feedrate) + 'Feed histogram')
         plt.hist(df['Feed'])
+        plt.xlabel('value')
+        plt.ylabel('count')
         plt.show()
         plt.title(str(feedrate) + 'feed boxplot')
         plt.boxplot(df['Feed'])
+        plt.ylabel('value')
         plt.show()
-        '''
+        
     
         spindleSpeed_outliers = df[4790 > df['축1 spindleSpeed']].index
         df = df.drop(spindleSpeed_outliers)
@@ -111,32 +125,41 @@ class data_analysis:
         # Feed_outliers = df[Feed != df['Feed']].index
         # df = df.drop(Feed_outliers)
     
-        '''
+        
         print(str(feedrate) + '축1spindleLoad 데이터')
         print(df['축1spindleLoad'].describe())
         plt.title(str(feedrate) + 'axis 1 spindleLoad histogram')
         plt.hist(df['축1spindleLoad'])
+        plt.xlabel('value')
+        plt.ylabel('count')
         plt.show()
         plt.title(str(feedrate) + 'axis 1 spindleLoad boxplot')
         plt.boxplot(df['축1spindleLoad'])
+        plt.ylabel('value')
         plt.show()
         
         print(str(feedrate) + '축1 spindleSpeed 데이터')
         print(df['축1 spindleSpeed'].describe())
         plt.title(str(feedrate) + 'axis 1 spindleSpeed histogram')
         plt.hist(df['축1 spindleSpeed'])
+        plt.xlabel('value')
+        plt.ylabel('count')
         plt.show()
         plt.title(str(feedrate) + 'axis 1 spindleSpeed boxplot')
         plt.boxplot(df['축1 spindleSpeed'])
+        plt.ylabel('value')
         plt.show()
         
         print(str(feedrate) + 'Feed')
         print(df['Feed'].describe())
         plt.title(str(feedrate) + 'Feed histogram')
         plt.hist(df['Feed'])
+        plt.xlabel('value')
+        plt.ylabel('count')
         plt.show()
         plt.title(str(feedrate) + 'feed boxplot')
         plt.boxplot(df['Feed'])
+        plt.ylabel('value')
         plt.show()
     
         print(df.corr())
@@ -149,16 +172,18 @@ class data_analysis:
         
         plt.plot(df['축1spindleLoad'])
         plt.title(str(feedrate) + 'axis 1 spindleLoad')
+        plt.ylabel('value')
         plt.show()
         
         plt.plot(df['축1 spindleSpeed'])
         plt.title(str(feedrate) + 'axis 1 spindleSpeed')
+        plt.ylabel('value')
         plt.show()
         
         plt.plot(df['Feed'])
         plt.title(str(feedrate) + 'Feed')
+        plt.ylabel('value')
         plt.show()
-        '''
         
         return df
     
@@ -189,10 +214,10 @@ class data_analysis:
         absMean_value = abs_value.mean()
         
         # feature의 제곱의 루트 값
-        root_square_value = (df[feature]**2)**0.5
+        root_square_value = (df[feature])**0.5
         
         # feature의 제곱의 루트 값의 평균 값
-        sqr_amp_value = root_square_value.mean()
+        sqr_amp_value = (root_square_value.mean())**2
         
         # feature의 제곱의 루트 값을 feature의 절대 값 평균으로 나눈 값
         shape_factor_value = (((df[feature]**2).mean())**0.5) / abs_value.mean()
@@ -200,7 +225,23 @@ class data_analysis:
         magic_feature = [max_value, min_value, peak_value, std_value, skew_value, kurt_value, absMean_value, sqr_amp_value, shape_factor_value]
         magic_feature = DataFrame(magic_feature, ['max_value', 'min_value', 'peak_value', 'std_value', 'skew_value', 'kurt_value', 'absMean_value', 'sqr_amp_value', 'shape_factor_value'])
         
+        print('중앙 값 :',  df[feature].median)
+        
         return magic_feature
+    
+    
+    def probability_distribution(self, df, feature, feedrate):
+        
+        x = df[feature]
+        x = x.sort_values()
+        y = (1 / (np.sqrt(2 * np.pi) * x.var())) * np.exp(-1 * ((x-x.std()) ** 2 / (2 * (x.var()**2))))
+        plt.title(str(feedrate) + ' Feed ' + feature + ' probability distribution')
+        plt.plot(x, y)
+        plt.xlabel('value')
+        plt.show()
+        
+
+        return x, y
     
 if __name__ == '__main__':
     # 데이터 읽어오기
@@ -216,31 +257,31 @@ if __name__ == '__main__':
     df_960 = DataFrame(data_960, columns = ['축1spindleLoad', '축1 spindleSpeed', 'Feed'])
     df_960 = data_anal.preprocess(df_960, 960)
     df_960_magic_feature = data_anal.magic_feature(df_960, '축1spindleLoad')
-    print("df_960_magic_feature")
+    print("df_960")
     print(df_960_magic_feature)
     
     df_2000 = DataFrame(data_2000, columns = ['축1spindleLoad', '축1 spindleSpeed', 'Feed'])
     df_2000 = data_anal.preprocess(df_2000, 2000)
     df_2000_magic_feature = data_anal.magic_feature(df_2000, '축1spindleLoad')
-    print("df_2000_magic_feature")
+    print("df_2000")
     print(df_2000_magic_feature)
     
     df_2200 = DataFrame(data_2200, columns = ['축1spindleLoad', '축1 spindleSpeed', 'Feed'])
     df_2200 = data_anal.preprocess(df_2200, 2200)
     df_2200_magic_feature = data_anal.magic_feature(df_2200, '축1spindleLoad')
-    print("df_2200_magic_feature")
+    print("df_2200")
     print(df_2200_magic_feature)
     
     df_2400 = DataFrame(data_2400, columns = ['축1spindleLoad', '축1 spindleSpeed', 'Feed'])
     df_2400 = data_anal.preprocess(df_2400, 2400)
     df_2400_magic_feature = data_anal.magic_feature(df_2400, '축1spindleLoad')
-    print("df_2400_magic_feature")
+    print("df_2400")
     print(df_2400_magic_feature)
     
     df_2600 = DataFrame(data_2600, columns = ['축1spindleLoad', '축1 spindleSpeed', 'Feed'])
     df_2600 = data_anal.preprocess(df_2600, 2600)
     df_2600_magic_feature = data_anal.magic_feature(df_2600, '축1spindleLoad')
-    print("df_2600_magic_feature")
+    print("df_2600")
     print(df_2600_magic_feature)
     
-    
+    x, y = data_anal.probability_distribution(df_2000, '축1spindleLoad', 2000)
