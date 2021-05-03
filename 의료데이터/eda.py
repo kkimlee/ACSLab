@@ -191,7 +191,7 @@ for i in range(len(_9M)):
 data['result'] = pd.to_numeric(data['result'])
 
 Relapse = data['Relapse']
-one_hot_data['Relapse'] = label_encoder.fit_transform(np.array(one_hot_result))
+one_hot_data['Relapse'] = label_encoder.fit_transform(np.array(Relapse))
 for i in range(len(Relapse)):
     relapse = Relapse.iloc[i]
     if relapse == 1:
@@ -222,7 +222,7 @@ fig.set_size_inches(8,6)
 plt.title('one hot Heat map')
 plt.show()
 
-label = 'Relapse'
+label = 'result'
 
 train_data = data.drop(columns=['3M', '6M', '9M', 'result', 'Relapse'])
 train_data_label = data[label]
