@@ -43,7 +43,6 @@ data = raw_data.fillna(0)
 one_hot_data = raw_data.fillna(0)
 
 AGE = data['age 60']
-one_hot_data['age 60'] = label_encoder.fit_transform(np.array(AGE))
 for i in range(len(AGE)):
     age = AGE.iloc[i]
     if age == 0:
@@ -53,9 +52,16 @@ for i in range(len(AGE)):
     else:
         AGE.iloc[i] = 0
 
+one_hot_age = one_hot_data['age 60']
+for i in range(len(one_hot_age)):
+    age = one_hot_age.iloc[i]
+    if age == 0:
+        one_hot_age[i] = 0
+    elif age == 1:
+        one_hot_age[i] = 1
+one_hot_data['age 60'] = label_encoder.fit_transform(np.array(one_hot_age))
+
 MLH1 = data['MLH1']
-one_hot_MLH1 = MLH1.replace(0, 'none')
-one_hot_data['MLH1'] = label_encoder.fit_transform(np.array(one_hot_MLH1))
 for i in range(len(MLH1)):
     MLH = str(MLH1.iloc[i])
     if MLH == 'Intact' or MLH == 'intact': # 정상
@@ -66,11 +72,18 @@ for i in range(len(MLH1)):
         MLH1.iloc[i] = 0
 data['MLH1'] = pd.to_numeric(data['MLH1'])
 
-
+one_hot_MLH1 = one_hot_data['MLH1']
+for i in range(len(one_hot_MLH1)):
+    MLH = str(one_hot_MLH1.iloc[i])
+    if MLH == 'Intact' or MLH == 'intact':
+        one_hot_MLH1.iloc[i] = 'intact'
+    elif MLH == 'loss' or MLH == 'Partial loss':
+        one_hot_MLH1.iloc[i] = 'loss'
+    else:
+        one_hot_MLH1.iloc[i] = 'none'
+one_hot_data['MLH1'] = label_encoder.fit_transform(np.array(one_hot_MLH1))
 
 MSH2 = data['MSH2']
-one_hot_MSH2 = MSH2.replace(0, 'none')
-one_hot_data['MSH2'] = label_encoder.fit_transform(np.array(one_hot_MSH2))
 for i in range(len(MSH2)):
     msh2 = str(MSH2.iloc[i])
     if msh2 == 'intact' or msh2 == 'Intact': # 정상
@@ -81,9 +94,18 @@ for i in range(len(MSH2)):
         MSH2.iloc[i] = 0
 data['MSH2'] = pd.to_numeric(data['MSH2'])
 
+one_hot_MSH2 = one_hot_data['MSH2']
+for i in range(len(one_hot_MSH2)):
+    msh2 = str(one_hot_MSH2.iloc[i])
+    if msh2 == 'intact' or msh2 == 'Intact':
+        one_hot_MSH2.iloc[i] = 'intact'
+    elif msh2 == 'loss' or msh2 == 'Partial loss':
+        one_hot_MSH2.iloc[i] = 'loss'
+    else:
+        one_hot_MSH2.iloc[i] = 'none'
+one_hot_data['MSH2'] = label_encoder.fit_transform(np.array(one_hot_MSH2))
+
 MSH6 = data['MSH6']
-one_hot_MSH6 = MSH6.replace(0, 'none')
-one_hot_data['MSH6'] = label_encoder.fit_transform(np.array(one_hot_MSH6))
 for i in range(len(MSH6)):
     msh6 = str(MSH6.iloc[i])
     if msh6 == 'intact' or msh6 == 'Intact': # 정상
@@ -94,9 +116,18 @@ for i in range(len(MSH6)):
         MSH6.iloc[i] = 0
 data['MSH6'] = pd.to_numeric(data['MSH6'])
 
+one_hot_MSH6 = one_hot_data['MSH6']
+for i in range(len(one_hot_MSH6)):
+    msh6 = str(one_hot_MSH6.iloc[i])
+    if msh6 == 'intact' or msh6 == 'Intact':
+        one_hot_MSH6.iloc[i] = 'intact'
+    elif msh6 == 'loss' or msh6 == 'Partial loss' or msh6 == 'Loss':
+        one_hot_MSH6.iloc[i] = 'loss'
+    else:
+        one_hot_MSH6.iloc[i] = 'none'
+one_hot_data['MSH6'] = label_encoder.fit_transform(np.array(one_hot_MSH6))
+
 PMS2 = data['PMS2']
-one_hot_PMS2 = PMS2.replace(0, 'none')
-one_hot_data['PMS2'] = label_encoder.fit_transform(np.array(one_hot_PMS2))
 for i in range(len(PMS2)):
     pms2 = str(PMS2.iloc[i])
     if pms2 == 'intact' or pms2 == 'Intact' or pms2 == 'Intra': # 정상
@@ -107,9 +138,18 @@ for i in range(len(PMS2)):
         PMS2.iloc[i] = 0
 data['PMS2'] = pd.to_numeric(data['PMS2'])
 
+one_hot_PMS2 = one_hot_data['PMS2']
+for i in range(len(one_hot_PMS2)):
+    pms2 = str(one_hot_PMS2.iloc[i])
+    if pms2 == 'intact' or pms2 == 'Intact' or pms2 == 'Intra': # 정상
+        one_hot_PMS2.iloc[i] = 'intact'
+    elif pms2 == 'loss' or pms2 == 'Partial loss': # 비정상
+        one_hot_PMS2.iloc[i] = 'loss'
+    else:
+        one_hot_PMS2.iloc[i] = 'none'
+one_hot_data['PMS2'] = label_encoder.fit_transform(np.array(one_hot_PMS2))
+
 MSI = data['MSI']
-one_hot_MSI = MSI.replace(0, 'none')
-one_hot_data['MSI'] = label_encoder.fit_transform(np.array(one_hot_MSI))
 for i in range(len(MSI)):
     msi = str(MSI.iloc[i])
     if msi[0:4] == 'high':
@@ -122,9 +162,20 @@ for i in range(len(MSI)):
         MSI.iloc[i] = 0
 data['MSI'] = pd.to_numeric(data['MSI'])
 
+one_hot_MSI = one_hot_data['MSI']
+for i in range(len(one_hot_MSI)):
+    msi = str(one_hot_MSI.iloc[i])
+    if msi[0:4] == 'high':
+        one_hot_MSI.iloc[i] = 'high'
+    elif msi[0:3] == 'low':
+        one_hot_MSI.iloc[i] = 'low'
+    elif msi == 'stable' or msi == 'Stable':
+        one_hot_MSI.iloc[i] = 'stable'
+    else:
+        one_hot_MSI.iloc[i] = 'none'
+one_hot_data['MSI'] = label_encoder.fit_transform(np.array(one_hot_MSI))
+
 _3M = data['3M']
-one_hot_3M = _3M.replace(0, 'none')
-one_hot_data['3M'] = label_encoder.fit_transform(np.array(one_hot_3M))
 for i in range(len(_3M)):
     _3m = str(_3M.iloc[i])
     if _3m[-2:] == 'SD':
@@ -139,9 +190,22 @@ for i in range(len(_3M)):
         _3M.iloc[i] = 0
 data['3M'] = pd.to_numeric(data['3M'])
 
+one_hot_3m = one_hot_data['3M']
+for i in range(len(one_hot_3m)):
+    _3m = str(one_hot_3m.iloc[i])
+    if _3m[-2:] == 'SD':
+        one_hot_3m.iloc[i] = 'SD'
+    elif _3m[-2:] == 'PR':
+        one_hot_3m.iloc[i] = 'PR'
+    elif _3m[-2:] == 'PD':
+        one_hot_3m.iloc[i] = 'PD'
+    elif _3m[-2:] == 'CR':
+        one_hot_3m.iloc[i] = 'CR'
+    else:
+        one_hot_3m.iloc[i] = 'none'
+one_hot_data['3M'] = label_encoder.fit_transform(np.array(one_hot_3m))
+
 _6M = data['6M']
-one_hot_6M = _6M.replace(0, 'none')
-one_hot_data['6M'] = label_encoder.fit_transform(np.array(one_hot_6M))
 for i in range(len(_6M)):
     _6m = str(_6M.iloc[i])
     if _6m[-2:] == 'SD':
@@ -156,9 +220,22 @@ for i in range(len(_6M)):
         _6M.iloc[i] = 0
 data['6M'] = pd.to_numeric(data['6M'])
 
+one_hot_6m = one_hot_data['6M']
+for i in range(len(one_hot_6m)):
+    _6m = str(one_hot_6m.iloc[i])
+    if _6m[-2:] == 'SD':
+        one_hot_6m.iloc[i] = 'SD'
+    elif _6m[-2:] == 'PR':
+        one_hot_6m.iloc[i] = 'PR'
+    elif _6m[-2:] == 'PD':
+        one_hot_6m.iloc[i] = 'PD'
+    elif _6m[-2:] == 'CR':
+        one_hot_6m.iloc[i] = 'CR'
+    else:
+        one_hot_6m.iloc[i] = 'none'
+one_hot_data['6M'] = label_encoder.fit_transform(np.array(one_hot_6m))
+
 _9M = data['9M']
-one_hot_9M = _9M.replace(0, 'none')
-one_hot_data['9M'] = label_encoder.fit_transform(np.array(one_hot_9M))
 for i in range(len(_9M)):
     _9m = str(_9M.iloc[i])
     if _9m[-2:] == 'SD':
@@ -173,9 +250,22 @@ for i in range(len(_9M)):
         _9M.iloc[i] = 0
 data['9M'] = pd.to_numeric(data['9M'])
 
+one_hot_9m = one_hot_data['9M']
+for i in range(len(one_hot_9m)):
+    _9m = str(one_hot_9m.iloc[i])
+    if _9m[-2:] == 'SD':
+        one_hot_9m.iloc[i] = 'SD'
+    elif _9m[-2:] == 'PR':
+        one_hot_9m.iloc[i] = 'PR'
+    elif _9m[-2:] == 'PD':
+        one_hot_9m.iloc[i] = 'PD'
+    elif _9m[-2:] == 'CR':
+        one_hot_9m.iloc[i] = 'CR'
+    else:
+        one_hot_9m.iloc[i] = 'none'
+one_hot_data['9M'] = label_encoder.fit_transform(np.array(one_hot_9m))
+
 Result = data['result']
-one_hot_result = Result.replace(0, 'none')
-one_hot_data['result'] = label_encoder.fit_transform(np.array(one_hot_result))
 for i in range(len(_9M)):
     result = str(Result.iloc[i])
     if result == 'SD':
@@ -189,6 +279,21 @@ for i in range(len(_9M)):
     else:
         Result.iloc[i] = 0
 data['result'] = pd.to_numeric(data['result'])
+
+one_hot_result = one_hot_data['result']
+for i in range(len(one_hot_9m)):
+    result = str(one_hot_result.iloc[i])
+    if result[-2:] == 'SD':
+        one_hot_result.iloc[i] = 'SD'
+    elif result[-2:] == 'PR':
+        one_hot_result.iloc[i] = 'PR'
+    elif result[-2:] == 'PD':
+        one_hot_result.iloc[i] = 'PD'
+    elif result[-2:] == 'CR':
+        one_hot_result.iloc[i] = 'CR'
+    else:
+        one_hot_result.iloc[i] = 'none'
+one_hot_data['result'] = label_encoder.fit_transform(np.array(one_hot_result))
 
 Relapse = data['Relapse']
 one_hot_data['Relapse'] = label_encoder.fit_transform(np.array(Relapse))
@@ -224,11 +329,15 @@ plt.show()
 
 label = 'result'
 
+data_bin = one_hot_data.groupby(['MSH6', '3M']).size()
+print(data_bin)
+
 train_data = data.drop(columns=['3M', '6M', '9M', 'result', 'Relapse'])
 train_data_label = data[label]
 
 one_hot_train_data = one_hot_data.drop(columns=['3M', '6M', '9M', 'result', 'Relapse'])
 one_hot_train_data_label = one_hot_data[label]
+
 '''
 chi_square_result = list()
 for column in train_data.columns:
