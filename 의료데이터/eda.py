@@ -327,10 +327,15 @@ fig.set_size_inches(8,6)
 plt.title('one hot Heat map')
 plt.show()
 
-label = 'result'
+label = 'Relapse'
 
-data_bin = one_hot_data.groupby(['MSH6', '3M']).size()
-print(data_bin)
+data_bin_age = one_hot_data.groupby(['age 60', label]).size()
+data_bin_MLH1 = one_hot_data.groupby(['MLH1', label]).size()
+data_bin_MSH2 = one_hot_data.groupby(['MSH2', label]).size()
+data_bin_MSH6 = one_hot_data.groupby(['MSH6', label]).size()
+data_bin_PMS2 = one_hot_data.groupby(['PMS2', label]).size()
+data_bin_MSI = one_hot_data.groupby(['MSI', label]).size()
+data_bin_size = one_hot_data.groupby(['size', label]).size()
 
 train_data = data.drop(columns=['3M', '6M', '9M', 'result', 'Relapse'])
 train_data_label = data[label]
