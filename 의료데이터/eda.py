@@ -103,7 +103,7 @@ for i in range(len(one_hot_MSH2)):
         one_hot_MSH2.iloc[i] = 'loss'
     else:
         one_hot_MSH2.iloc[i] = 'none'
-one_hot_data['MSH2'] = label_encoder.fit_transform(np.array(one_hot_MSH2))
+one_hot_data['MSH2'] = label_encoder.transform(np.array(one_hot_MSH2))
 
 MSH6 = data['MSH6']
 for i in range(len(MSH6)):
@@ -125,7 +125,7 @@ for i in range(len(one_hot_MSH6)):
         one_hot_MSH6.iloc[i] = 'loss'
     else:
         one_hot_MSH6.iloc[i] = 'none'
-one_hot_data['MSH6'] = label_encoder.fit_transform(np.array(one_hot_MSH6))
+one_hot_data['MSH6'] = label_encoder.transform(np.array(one_hot_MSH6))
 
 PMS2 = data['PMS2']
 for i in range(len(PMS2)):
@@ -147,7 +147,7 @@ for i in range(len(one_hot_PMS2)):
         one_hot_PMS2.iloc[i] = 'loss'
     else:
         one_hot_PMS2.iloc[i] = 'none'
-one_hot_data['PMS2'] = label_encoder.fit_transform(np.array(one_hot_PMS2))
+one_hot_data['PMS2'] = label_encoder.transform(np.array(one_hot_PMS2))
 
 MSI = data['MSI']
 for i in range(len(MSI)):
@@ -233,7 +233,7 @@ for i in range(len(one_hot_6m)):
         one_hot_6m.iloc[i] = 'CR'
     else:
         one_hot_6m.iloc[i] = 'none'
-one_hot_data['6M'] = label_encoder.fit_transform(np.array(one_hot_6m))
+one_hot_data['6M'] = label_encoder.transform(np.array(one_hot_6m))
 
 _9M = data['9M']
 for i in range(len(_9M)):
@@ -263,7 +263,7 @@ for i in range(len(one_hot_9m)):
         one_hot_9m.iloc[i] = 'CR'
     else:
         one_hot_9m.iloc[i] = 'none'
-one_hot_data['9M'] = label_encoder.fit_transform(np.array(one_hot_9m))
+one_hot_data['9M'] = label_encoder.transform(np.array(one_hot_9m))
 
 Result = data['result']
 for i in range(len(_9M)):
@@ -293,7 +293,7 @@ for i in range(len(one_hot_9m)):
         one_hot_result.iloc[i] = 'CR'
     else:
         one_hot_result.iloc[i] = 'none'
-one_hot_data['result'] = label_encoder.fit_transform(np.array(one_hot_result))
+one_hot_data['result'] = label_encoder.transform(np.array(one_hot_result))
 
 Relapse = data['Relapse']
 one_hot_data['Relapse'] = label_encoder.fit_transform(np.array(Relapse))
