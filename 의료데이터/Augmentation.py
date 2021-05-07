@@ -396,14 +396,25 @@ for cls in arr_classes:
     
     col_counter = 0
     for col in cols:
+        print(cols)
+        print(desc_df[col]['mean'])
+        print(desc_df[col]['std'])
         sub_arr[:, col_counter] = np.random.normal(loc=desc_df[col]['mean'], 
                                                    scale=desc_df[col]['std'], 
-                                                   size= (dlt, 1)
+                                                   size=(dlt, 1)
                                                   )
         col_counter += 1
+        
+        if col == label:
+            sub_arr[:, col_counter-1] = desc_df[col]['mean']
+         
     new_class_arrays.append(sub_arr)
 
-new_samples = np.concatenate(new_class_arrays)
+
+new_samples = new_class_arrays[0]
+# new_samples = np.concatenate(new_class_arrays[1])
+# new_samples += new_class_arrays[2]
+
 # now that we have our new samples let's convert the purturbed columns back
 # to categorical columns using the list that we have created above
 
@@ -418,7 +429,7 @@ for c in cat_columns:
 
 
 test = new_samples
-print(test)
+# print(test)
 x = new_samples[:, :-1]
 labels = new_samples[:, -1:]
 results = np.zeros(x.shape[0])
