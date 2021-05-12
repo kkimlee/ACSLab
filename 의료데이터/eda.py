@@ -59,7 +59,7 @@ for i in range(len(one_hot_age)):
         one_hot_age[i] = 0
     elif age == 1:
         one_hot_age[i] = 1
-one_hot_data['age 60'] = label_encoder.fit_transform(np.array(one_hot_age))
+# one_hot_data['age 60'] = label_encoder.fit_transform(np.array(one_hot_age))
 
 MLH1 = data['MLH1']
 for i in range(len(MLH1)):
@@ -81,7 +81,7 @@ for i in range(len(one_hot_MLH1)):
         one_hot_MLH1.iloc[i] = 'loss'
     else:
         one_hot_MLH1.iloc[i] = 'none'
-one_hot_data['MLH1'] = label_encoder.fit_transform(np.array(one_hot_MLH1))
+# one_hot_data['MLH1'] = label_encoder.fit_transform(np.array(one_hot_MLH1))
 
 MSH2 = data['MSH2']
 for i in range(len(MSH2)):
@@ -103,7 +103,7 @@ for i in range(len(one_hot_MSH2)):
         one_hot_MSH2.iloc[i] = 'loss'
     else:
         one_hot_MSH2.iloc[i] = 'none'
-one_hot_data['MSH2'] = label_encoder.transform(np.array(one_hot_MSH2))
+# one_hot_data['MSH2'] = label_encoder.transform(np.array(one_hot_MSH2))
 
 MSH6 = data['MSH6']
 for i in range(len(MSH6)):
@@ -125,7 +125,7 @@ for i in range(len(one_hot_MSH6)):
         one_hot_MSH6.iloc[i] = 'loss'
     else:
         one_hot_MSH6.iloc[i] = 'none'
-one_hot_data['MSH6'] = label_encoder.transform(np.array(one_hot_MSH6))
+# one_hot_data['MSH6'] = label_encoder.transform(np.array(one_hot_MSH6))
 
 PMS2 = data['PMS2']
 for i in range(len(PMS2)):
@@ -147,7 +147,7 @@ for i in range(len(one_hot_PMS2)):
         one_hot_PMS2.iloc[i] = 'loss'
     else:
         one_hot_PMS2.iloc[i] = 'none'
-one_hot_data['PMS2'] = label_encoder.transform(np.array(one_hot_PMS2))
+# one_hot_data['PMS2'] = label_encoder.transform(np.array(one_hot_PMS2))
 
 MSI = data['MSI']
 for i in range(len(MSI)):
@@ -173,7 +173,7 @@ for i in range(len(one_hot_MSI)):
         one_hot_MSI.iloc[i] = 'stable'
     else:
         one_hot_MSI.iloc[i] = 'none'
-one_hot_data['MSI'] = label_encoder.fit_transform(np.array(one_hot_MSI))
+# one_hot_data['MSI'] = label_encoder.fit_transform(np.array(one_hot_MSI))
 
 _3M = data['3M']
 for i in range(len(_3M)):
@@ -203,7 +203,7 @@ for i in range(len(one_hot_3m)):
         one_hot_3m.iloc[i] = 'CR'
     else:
         one_hot_3m.iloc[i] = 'none'
-one_hot_data['3M'] = label_encoder.fit_transform(np.array(one_hot_3m))
+# one_hot_data['3M'] = label_encoder.fit_transform(np.array(one_hot_3m))
 
 _6M = data['6M']
 for i in range(len(_6M)):
@@ -233,7 +233,7 @@ for i in range(len(one_hot_6m)):
         one_hot_6m.iloc[i] = 'CR'
     else:
         one_hot_6m.iloc[i] = 'none'
-one_hot_data['6M'] = label_encoder.transform(np.array(one_hot_6m))
+# one_hot_data['6M'] = label_encoder.transform(np.array(one_hot_6m))
 
 _9M = data['9M']
 for i in range(len(_9M)):
@@ -263,7 +263,7 @@ for i in range(len(one_hot_9m)):
         one_hot_9m.iloc[i] = 'CR'
     else:
         one_hot_9m.iloc[i] = 'none'
-one_hot_data['9M'] = label_encoder.transform(np.array(one_hot_9m))
+# one_hot_data['9M'] = label_encoder.transform(np.array(one_hot_9m))
 
 Result = data['result']
 for i in range(len(_9M)):
@@ -293,7 +293,7 @@ for i in range(len(one_hot_9m)):
         one_hot_result.iloc[i] = 'CR'
     else:
         one_hot_result.iloc[i] = 'none'
-one_hot_data['result'] = label_encoder.transform(np.array(one_hot_result))
+# one_hot_data['result'] = label_encoder.transform(np.array(one_hot_result))
 
 Relapse = data['Relapse']
 one_hot_data['Relapse'] = label_encoder.fit_transform(np.array(Relapse))
@@ -327,15 +327,28 @@ fig.set_size_inches(8,6)
 plt.title('one hot Heat map')
 plt.show()
 
+
 label = 'Relapse'
 
-data_bin_age = one_hot_data.groupby(['age 60', label]).size()
-data_bin_MLH1 = one_hot_data.groupby(['MLH1', label]).size()
-data_bin_MSH2 = one_hot_data.groupby(['MSH2', label]).size()
-data_bin_MSH6 = one_hot_data.groupby(['MSH6', label]).size()
-data_bin_PMS2 = one_hot_data.groupby(['PMS2', label]).size()
-data_bin_MSI = one_hot_data.groupby(['MSI', label]).size()
-data_bin_size = one_hot_data.groupby(['size', label]).size()
+one_hot_data = one_hot_data.drop(columns=['tumor size(mm)'])
+
+count = list()
+for column in list(one_hot_data.columns[:-5]):
+    print(column)
+    data_ex_bin_age = np.zeros((len(one_hot_data[column].unique()), len(one_hot_data[label].unique())))
+    data_bin_age = list(one_hot_data.groupby([column, label]).size())
+
+    for i in range(len(data_bin_age)):
+        data_ex_bin_age[i//len(data_ex_bin_age[0])][i%len(data_ex_bin_age[0])] = data_bin_age[i]
+    index = list(one_hot_data[column].unique())
+    index.sort()
+    df = pd.DataFrame(data_ex_bin_age, index=index)
+    df['total'] = df[0] + df[1]
+    df.loc['total'] = df.sum()
+
+    count.append(df)
+
+
 
 train_data = data.drop(columns=['3M', '6M', '9M', 'result', 'Relapse'])
 train_data_label = data[label]
@@ -382,7 +395,7 @@ for column in train_data.columns:
     plt.title(label + '-' + column + r' $\chi^2$ Distribution (df = 2)')
     plt.show()
 '''
-
+'''
 one_hot_chi_square_result = list()
 for column in train_data.columns:
     one_hot_test_data = pd.DataFrame(one_hot_train_data[column].astype('category'))[column]
@@ -444,3 +457,4 @@ GradientBoosting_model.fit(train_data, train_data_label)
 result_GradientBoosting_model = GradientBoosting_model.predict(train_data)
 GradientBoosting_model_cm = confusion_matrix(train_data_label, result_GradientBoosting_model)
 print(GradientBoosting_model_cm)
+'''
