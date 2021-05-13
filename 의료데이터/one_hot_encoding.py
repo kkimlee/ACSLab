@@ -15,6 +15,8 @@ from sklearn.svm import LinearSVC
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.svm import LinearSVC
+from sklearn.naive_bayes import GaussianNB
 
 from sklearn.metrics import confusion_matrix, recall_score, accuracy_score, precision_score, fbeta_score
 from sklearn.model_selection import KFold
@@ -22,6 +24,7 @@ from sklearn.model_selection import cross_val_score
 
 from scipy import stats
 from sklearn.preprocessing import LabelEncoder
+
 
 import numpy as np
 import math
@@ -185,3 +188,60 @@ for i in range(len(count)):
         data_ratio_column[column] = (df[column] / df['total'])
         data_ratio_row[column] = (df[column]/df[column].loc['total'])
     data_ex.append((data_ratio_column * data_ratio_row * df['total'].loc['total']).drop(['total']))
+
+
+data_columns = list(one_hot_data.columns)
+data_columns.remove(label)
+for i in range(len(data_ex)):
+    df = data_ex[i]
+    df_bin = (df > 5)
+    data_bin = list(df_bin.to_numpy().flatten())
+    ratio = data_bin.count(False) / len(data_bin)
+    print(data_columns[i])
+    if ratio >= 0.2:
+        data = count[i].drop(['total'])
+        data = data.drop(columns=['total'])
+        
+        oddratio, pvalue = stats.fisher_exact(data)
+        print('fisher oddratio : ', oddratio, ' p-value : ', pvalue)
+    else:
+        data = count[i].drop(['total'])
+        data = data.drop(columns=['total'])
+        
+        chi_value = stats.chi2_contingency(data, correction=False)[0]
+        p_value = stats.chi2_contingency(data, correction=False)[1]
+        
+        print('chi square value : ', chi_value, ", p-value : ", p_value)
+
+train_data = one_hot_data.drop(columns=[label])
+train_data_label = one_hot_data[label]
+
+RF_model = RandomForestClassifier()
+RF_model.fit(train_data, train_data_label)
+result_RF_model = RF_model.predict(train_data)
+RF_model_cm = confusion_matrix(train_data_label, result_RF_model)
+print(RF_model_cm)
+
+GradientBoosting_model = GradientBoostingClassifier()
+GradientBoosting_model.fit(train_data, train_data_label)
+result_GradientBoosting_model = GradientBoosting_model.predict(train_data)
+GradientBoosting_model_cm = confusion_matrix(train_data_label, result_GradientBoosting_model)
+print(GradientBoosting_model_cm)
+
+LR_model = LogisticRegression()
+LR_model.fit(train_data, train_data_label)
+result_LR_model = LR_model.predict(train_data)
+LR_model_cm = confusion_matrix(train_data_label, result_LR_model)
+print(LR_model_cm)
+
+SVC_model = LinearSVC()
+SVC_model.fit(train_data, train_data_label)
+result_SVC_model = SVC_model.predict(train_data)
+SVC_model_cm = confusion_matrix(train_data_label, result_SVC_model)
+print(SVC_model_cm)
+
+NB_model = GaussianNB()
+NB_model.fit(train_data, train_data_label)
+result_NB_model = NB_model.predict(train_data)
+NB_model_cm = confusion_matrix(train_data_label, result_NB_model)
+print(NB_model_cm)
