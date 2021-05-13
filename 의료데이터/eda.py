@@ -334,22 +334,30 @@ one_hot_data = one_hot_data.drop(columns=['tumor size(mm)'])
 
 count = list()
 for column in list(one_hot_data.columns[:-5]):
-    print(column)
-    data_ex_bin_age = np.zeros((len(one_hot_data[column].unique()), len(one_hot_data[label].unique())))
-    data_bin_age = list(one_hot_data.groupby([column, label]).size())
+    data_bin_count = np.zeros((len(one_hot_data[column].unique()), len(one_hot_data[label].unique())))
+    data_bin = list(one_hot_data.groupby([column, label]).size())
 
-    for i in range(len(data_bin_age)):
-        data_ex_bin_age[i//len(data_ex_bin_age[0])][i%len(data_ex_bin_age[0])] = data_bin_age[i]
+    for i in range(len(data_bin)):
+        data_bin_count[i//len(data_bin_count[0])][i%len(data_bin_count[0])] = data_bin[i]
     index = list(one_hot_data[column].unique())
     index.sort()
-    df = pd.DataFrame(data_ex_bin_age, index=index)
+    df = pd.DataFrame(data_bin_count, index=index)
     df['total'] = df[0] + df[1]
     df.loc['total'] = df.sum()
 
     count.append(df)
 
-
-
+data_ex = list()
+for i in range(len(count)):
+    df = count[i]
+    data_ratio_column = pd.DataFrame()
+    data_ratio_row =pd.DataFrame()
+    for i in range(len(df.columns[:-1])):
+        column = df.columns[i]
+        data_ratio_column[column] = (df[column] / df['total'])
+        data_ratio_row[column] = (df[column]/df[column].loc['total'])
+    data_ex.append((data_ratio_column * data_ratio_row * df['total'].loc['total']).drop(['total']))
+    
 train_data = data.drop(columns=['3M', '6M', '9M', 'result', 'Relapse'])
 train_data_label = data[label]
 
@@ -433,7 +441,16 @@ for column in train_data.columns:
     plt.grid()
     plt.title(label + '-' + column + r' $\chi^2$ Distribution (df = 2)')
     plt.show()
+'''
+one_hot_fisher_result = list()
+for column in train_data.columns:
+    one_hot_test_data = pd.DataFrame(one_hot_train_data[column].astype('category'))[column]
+    one_hot_target_data = pd.DataFrame(one_hot_train_data_label.astype('category'))[label]
+    
+    one_hot_fisher_data = pd.crosstab(one_hot_test_data, one_hot_target_data)
+    one_hot_fisher_result.append(stats.fisher_exact(one_hot_fisher_data))
 
+'''
 LR_model = LogisticRegression()
 LR_model.fit(train_data, train_data_label)
 result_LR_model = LR_model.predict(train_data)
