@@ -13,12 +13,13 @@ import matplotlib.pyplot as plt
 
 from sklearn.svm import LinearSVC
 from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.svm import LinearSVC
 from sklearn.naive_bayes import GaussianNB
+from sklearn.svm import SVC
 
-from sklearn.metrics import confusion_matrix, recall_score, accuracy_score, precision_score, fbeta_score
+from sklearn.metrics import *
 from sklearn.model_selection import KFold
 from sklearn.model_selection import cross_val_score
 
@@ -220,28 +221,74 @@ RF_model = RandomForestClassifier()
 RF_model.fit(train_data, train_data_label)
 result_RF_model = RF_model.predict(train_data)
 RF_model_cm = confusion_matrix(train_data_label, result_RF_model)
+print('RF result')
 print(RF_model_cm)
+print(classification_report(train_data_label, result_RF_model))
+
 
 GradientBoosting_model = GradientBoostingClassifier()
 GradientBoosting_model.fit(train_data, train_data_label)
 result_GradientBoosting_model = GradientBoosting_model.predict(train_data)
 GradientBoosting_model_cm = confusion_matrix(train_data_label, result_GradientBoosting_model)
+print('GradientBoosting result')
 print(GradientBoosting_model_cm)
+print(classification_report(train_data_label, result_GradientBoosting_model))
 
-LR_model = LogisticRegression()
-LR_model.fit(train_data, train_data_label)
-result_LR_model = LR_model.predict(train_data)
-LR_model_cm = confusion_matrix(train_data_label, result_LR_model)
-print(LR_model_cm)
+LogisticRegression_model = LogisticRegression()
+LogisticRegression_model.fit(train_data, train_data_label)
+result_LogisticRegression_model = LogisticRegression_model.predict(train_data)
+LogisticRegression_model_cm = confusion_matrix(train_data_label, result_LogisticRegression_model)
+print('LogisticRegression result')
+print(LogisticRegression_model_cm)
+print(classification_report(train_data_label, result_LogisticRegression_model))
 
-SVC_model = LinearSVC()
-SVC_model.fit(train_data, train_data_label)
-result_SVC_model = SVC_model.predict(train_data)
-SVC_model_cm = confusion_matrix(train_data_label, result_SVC_model)
-print(SVC_model_cm)
+Linear_SVC_model = LinearSVC()
+Linear_SVC_model.fit(train_data, train_data_label)
+result_Linear_SVC_model = Linear_SVC_model.predict(train_data)
+Linear_SVC_model_cm = confusion_matrix(train_data_label, result_Linear_SVC_model)
+print('Linear_SVC result')
+print(Linear_SVC_model_cm)
+print(classification_report(train_data_label, result_Linear_SVC_model))
 
 NB_model = GaussianNB()
 NB_model.fit(train_data, train_data_label)
 result_NB_model = NB_model.predict(train_data)
 NB_model_cm = confusion_matrix(train_data_label, result_NB_model)
+print('NB result')
 print(NB_model_cm)
+print(classification_report(train_data_label, result_NB_model))
+
+Kernel_SVC_model = SVC()
+Kernel_SVC_model.fit(train_data, train_data_label)
+result_Kernel_SVC_model = Kernel_SVC_model.predict(train_data)
+Kernel_SVC_model_cm = confusion_matrix(train_data_label, result_Kernel_SVC_model)
+print('Kernel_SVC result')
+print(Kernel_SVC_model_cm)
+print(classification_report(train_data_label, result_Kernel_SVC_model))
+
+fpr1, tpr1, thresholds1 = roc_curve(train_data_label, RF_model.predict_proba(train_data)[:, 1])
+auc1 = auc(fpr1, tpr1)
+fpr2, tpr2, thresholds1 = roc_curve(train_data_label, GradientBoosting_model.predict_proba(train_data)[:, 1])
+auc2 = auc(fpr2, tpr2)
+fpr3, tpr3, thresholds1 = roc_curve(train_data_label, LogisticRegression_model.decision_function(train_data))
+auc3 = auc(fpr3, tpr3)
+fpr4, tpr4, thresholds1 = roc_curve(train_data_label, Linear_SVC_model.decision_function(train_data))
+auc4 = auc(fpr4, tpr4)
+fpr5, tpr5, thresholds1 = roc_curve(train_data_label, NB_model.predict_proba(train_data)[:, 1])
+auc5 = auc(fpr5, tpr5)
+fpr6, tpr6, thresholds1 = roc_curve(train_data_label, Kernel_SVC_model.decision_function(train_data))
+auc6 = auc(fpr6, tpr6)
+
+plt.plot(fpr1, tpr1, 'o-', ms=2, label="RandomForestClassifier(" + str(auc1)[:4] + ")")
+plt.plot(fpr2, tpr2, 'o-', ms=2, label="GradientBoostingClassifier(" + str(auc2)[:4] + ")")
+plt.plot(fpr3, tpr3, 'o-', ms=2, label="LogisticRegression(" + str(auc3)[:4] + ")")
+plt.plot(fpr4, tpr4, 'o-', ms=2, label="LinearSVC(" + str(auc4)[:4] + ")")
+plt.plot(fpr5, tpr5, 'o-', ms=2, label="GaussianNB(" + str(auc5)[:4] + ")")
+plt.plot(fpr6, tpr6, 'o-', ms=2, label="KernelSVC(" + str(auc6)[:4] + ")")
+
+plt.legend()
+plt.plot([0, 1], [0, 1], 'k--', label="random guess")
+plt.xlabel('Fall-Out')
+plt.ylabel('Recall')
+plt.title('ROC curve')
+plt.show()
