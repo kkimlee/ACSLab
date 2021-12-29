@@ -1,0 +1,8 @@
+D:/ACSL/darknet/darknet/build_win_release_novcpkg/CMakeFiles/dark.dir
+D:/ACSL/darknet/darknet/build_win_release_novcpkg/CMakeFiles/uselib.dir
+D:/ACSL/darknet/darknet/build_win_release_novcpkg/CMakeFiles/darknet.dir
+D:/ACSL/darknet/darknet/build_win_release_novcpkg/CMakeFiles/edit_cache.dir
+D:/ACSL/darknet/darknet/build_win_release_novcpkg/CMakeFiles/rebuild_cache.dir
+D:/ACSL/darknet/darknet/build_win_release_novcpkg/CMakeFiles/list_install_components.dir
+D:/ACSL/darknet/darknet/build_win_release_novcpkg/CMakeFiles/install.dir
+D:/ACSL/darknet/darknet/build_win_release_novcpkg/CMakeFiles/install/local.dir

@@ -1,0 +1,10 @@
+D:/ACSL/darknet/darknet/darknetd.lib
+D:/ACSL/darknet/darknet/darknetd.dll
+D:/ACSL/darknet/darknet/include/darknet/darknet.h
+D:/ACSL/darknet/darknet/include/darknet/yolo_v2_class.hpp
+D:/ACSL/darknet/darknet/uselib.exe
+D:/ACSL/darknet/darknet/darknet.exe
+D:/ACSL/darknet/darknet/share/darknet/DarknetTargets.cmake
+D:/ACSL/darknet/darknet/share/darknet/DarknetTargets-debug.cmake
+D:/ACSL/darknet/darknet/share/darknet/DarknetConfig.cmake
+D:/ACSL/darknet/darknet/share/darknet/DarknetConfigVersion.cmake
